@@ -35,16 +35,16 @@ module.exports = function (config) {
       subdir: '.',
       reporters: [
         { type: 'html' },
-        { type: 'text-summary' }
+        { type: 'text-summary' },
+        { type: 'lcovonly' }
       ],
-      check: { //The check property causes the tool to enforce a minimum of 80% code coverage when the unit tests are run in the project.
+      check: {
         global: {
-          statements: 30,
-          branches: 30,
-          functions: 30,
-          lines: 30,
-          includes: ['src/**/performance-test-api/**/*.ts'], 
-        },
+          statements: 80,
+          branches: 80,
+          functions: 80,
+          lines: 80
+        }
       }
     },
     reporters: ['progress', 'kjhtml'],

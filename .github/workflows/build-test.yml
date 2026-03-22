@@ -36,6 +36,7 @@ jobs:
         distribution: 'sapmachine'
         cache: maven
     - name: Build and test with Maven
+      working-directory: ./backend
       run: |
         mvn clean install
     # For now, the backend jar is not reused in subsequent steps

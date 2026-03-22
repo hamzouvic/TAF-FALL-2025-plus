@@ -39,9 +39,9 @@ jobs:
         distribution: 'sapmachine'
         cache: maven
     - name: Build and test with Maven
-      working-directory: ./backend
       run: |
-        mvn clean install
+        mvn -f performance/pom.xml clean install -DskipTests -q
+        mvn -f backend/pom.xml clean install -q
     # For now, the backend jar is not reused in subsequent steps
     # - name: Upload .jar file
     #   uses: actions/upload-artifact@v4
@@ -65,11 +65,11 @@ jobs:
           PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
       - name: Install dependencies
         working-directory: ./frontend
-        run: npm install
+        run: npm install --legacy-peer-deps
       - name: Test
         working-directory: ./frontend
         run: npm run test
       - name: Build
         if: always()
         working-directory: ./frontend
-        run: npm run ng build
+        run: npm run build

@@ -52,6 +52,9 @@ jobs:
           distribution: 'sapmachine'
           cache: maven
 
+      - name: Build Performance Artifacts Required by Backend
+        run: mvn -f performance/pom.xml clean install -DskipTests -q
+
       - name: Build Backend (without tests)
         working-directory: ./backend
         run: mvn clean compile -DskipTests -q
@@ -120,7 +123,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./frontend
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
       - name: Lint with ESLint
         working-directory: ./frontend
@@ -223,7 +226,9 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./test-generation-service
-        run: pip install -r requirements-dev.txt
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
 
       - name: Lint with flake8
         working-directory: ./test-generation-service
@@ -373,7 +378,7 @@ jobs:
       - name: Generate Frontend Documentation (Compodoc)
         working-directory: ./frontend
         run: |
-          npm ci
+          npm install --legacy-peer-deps
           npx compodoc -p tsconfig.app.json -d ../docs/frontend --hideSource
 
       - name: Generate Backend OpenAPI Documentation

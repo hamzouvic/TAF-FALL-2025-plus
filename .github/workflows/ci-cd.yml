@@ -1,0 +1,575 @@
+name: CI/CD Pipeline - Build, Test, Quality & Documentation
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+  pull_request:
+    branches:
+      - develop
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - edited
+  workflow_dispatch:
+
+# Cancel in-progress runs when a new run is triggered
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MAVEN_OPTS: "-Xmx1024m"
+  NODE_OPTIONS: "--max-old-space-size=4096"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  # ============================================================================
+  # Backend: Build, Lint, Test, Coverage
+  # ============================================================================
+  backend:
+    runs-on: ubuntu-latest
+    name: Backend (Java/Maven)
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # Full history for SonarCloud analysis
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'sapmachine'
+          cache: maven
+
+      - name: Install Parent POM
+        run: mvn -N -f pom.docker.xml install -q
+
+      - name: Build Performance Artifacts Required by Backend
+        run: mvn -f performance/pom.xml clean install -DskipTests -q
+
+      - name: Build Backend (without tests)
+        working-directory: ./backend
+        run: mvn clean compile -DskipTests -q
+
+      - name: Lint with Checkstyle
+        working-directory: ./backend
+        run: mvn checkstyle:check -q || true  # Don't fail build on style issues for now
+        continue-on-error: true
+
+      - name: Run PMD Analysis
+        working-directory: ./backend
+        run: mvn pmd:check -q || true
+        continue-on-error: true
+
+      - name: Unit Tests
+        working-directory: ./backend
+        run: mvn test -q
+        env:
+          API_TEST_TOKEN: test-secret-for-ci-only
+          API_TEST_EXP_TIME: 3600000
+          API_TEST_URL: http://localhost
+          API_TEST_PORT: 8080
+          SELENIUM_URL: http://localhost
+          SELENIUM_PORT: 4444
+          EUREKA_CLIENT_ENABLED: false
+
+      - name: Integration Tests
+        working-directory: ./backend
+        run: mvn failsafe:integration-test -q || true
+        env:
+          API_TEST_TOKEN: test-secret-for-ci-only
+          API_TEST_EXP_TIME: 3600000
+          API_TEST_URL: http://localhost
+          API_TEST_PORT: 8080
+          SELENIUM_URL: http://localhost
+          SELENIUM_PORT: 4444
+          EUREKA_CLIENT_ENABLED: false
+
+      - name: Generate JaCoCo Coverage Report
+        working-directory: ./backend
+        run: mvn jacoco:report -q
+
+      - name: Archive Backend Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/target/*.jar
+          retention-days: 5
+          if-no-files-found: ignore
+
+      - name: Archive Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/target/site/jacoco/
+          retention-days: 30
+          if-no-files-found: ignore
+
+  # ============================================================================
+  # Frontend: Build, Lint, Test, Coverage
+  # ============================================================================
+  frontend:
+    runs-on: ubuntu-latest
+    name: Frontend (Angular)
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install Chrome Headless
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+        env:
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm install --legacy-peer-deps
+
+      - name: Lint with ESLint
+        working-directory: ./frontend
+        run: npm run lint -- --format json > eslint-report.json 2>&1 || true
+        continue-on-error: true
+
+      - name: Format Check with Prettier
+        working-directory: ./frontend
+        run: npm run format:check || true
+        continue-on-error: true
+
+      - name: Build Angular Project
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: Run Unit Tests with Coverage
+        working-directory: ./frontend
+        run: npm run test -- --watch=false --code-coverage
+        env:
+          CI: 'true'
+
+      - name: Archive Frontend Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/dist/
+          retention-days: 5
+          if-no-files-found: ignore
+
+      - name: Archive Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: frontend/coverage/
+          retention-days: 30
+          if-no-files-found: ignore
+
+  # ============================================================================
+  # Performance Tests: Build, Lint, Test
+  # ============================================================================
+  performance:
+    runs-on: ubuntu-latest
+    name: Performance Tests (Maven)
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'sapmachine'
+          cache: maven
+
+      - name: Install Parent POM
+        run: mvn -N -f pom.docker.xml install -q
+
+      - name: Build Performance Modules (without tests)
+        working-directory: ./performance
+        run: mvn clean compile -DskipTests -q
+
+      - name: Lint with Checkstyle
+        working-directory: ./performance
+        run: mvn checkstyle:check -q || true
+        continue-on-error: true
+
+      - name: Run PMD Analysis
+        working-directory: ./performance
+        run: mvn pmd:check -q || true
+        continue-on-error: true
+
+      - name: Run Performance Tests
+        working-directory: ./performance
+        run: mvn test -q || true
+
+      - name: Generate Coverage Report
+        working-directory: ./performance
+        run: mvn jacoco:report -q || true
+
+      - name: Archive Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-coverage
+          path: performance/target/site/jacoco/
+          retention-days: 30
+          if-no-files-found: ignore
+
+  # ============================================================================
+  # Python Test Generation Service: Build, Lint, Test
+  # ============================================================================
+  test-generation-service:
+    runs-on: ubuntu-latest
+    name: Test Generation Service (Python)
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: ./test-generation-service
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Lint with flake8
+        working-directory: ./test-generation-service
+        run: flake8 app --count --statistics || true
+        continue-on-error: true
+
+      - name: Format Check with black
+        working-directory: ./test-generation-service
+        run: black --check app || true
+        continue-on-error: true
+
+      - name: Type Check with mypy
+        working-directory: ./test-generation-service
+        run: mypy app --ignore-missing-imports || true
+        continue-on-error: true
+
+      - name: Run pytest with Coverage
+        working-directory: ./test-generation-service
+        run: pytest --cov=app --cov-report=xml --cov-report=html || true
+        continue-on-error: true
+
+      - name: Archive Python Coverage XML
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-generation-coverage-xml
+          path: test-generation-service/coverage.xml
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Archive Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-generation-coverage
+          path: test-generation-service/htmlcov/
+          retention-days: 30
+          if-no-files-found: ignore
+
+  # ============================================================================
+  # Quality Gate: SonarCloud Analysis (runs after tests complete)
+  # ============================================================================
+  sonarcloud:
+    needs: [ backend, frontend, performance, test-generation-service ]
+    runs-on: ubuntu-latest
+    name: SonarCloud Quality Gate (develop only)
+    if: github.ref == 'refs/heads/develop' && always()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # Full history for SonarCloud analysis
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Validate Sonar token
+        run: |
+          if [ -z "${{ secrets.SONAR_TOKEN }}" ]; then
+            echo "SONAR_TOKEN is missing. Add it in GitHub -> Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+
+      - name: Validate Sonar project access
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          PROJECT_KEY=$(grep '^sonar.projectKey=' sonar-project.properties | cut -d'=' -f2)
+          ORG_KEY=$(grep '^sonar.organization=' sonar-project.properties | cut -d'=' -f2)
+
+          echo "Checking Sonar project access for key: ${PROJECT_KEY} (org: ${ORG_KEY})"
+
+          HTTP_CODE=$(curl -sS -o /tmp/sonar_projects.json -w "%{http_code}" \
+            -u "${SONAR_TOKEN}:" \
+            "https://sonarcloud.io/api/projects/search?organization=${ORG_KEY}&projects=${PROJECT_KEY}")
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "SonarCloud API request failed with HTTP ${HTTP_CODE}."
+            cat /tmp/sonar_projects.json || true
+            exit 1
+          fi
+
+          if ! grep -q '"key":"'"${PROJECT_KEY}"'"' /tmp/sonar_projects.json; then
+            echo "Project key ${PROJECT_KEY} is not visible to this SONAR_TOKEN in org ${ORG_KEY}."
+            echo "Either the project does not exist, or the token user lacks permissions."
+            cat /tmp/sonar_projects.json
+            exit 1
+          fi
+
+          echo "Sonar project access confirmed."
+
+      - name: Prepare coverage reports for SonarScanner
+        run: |
+          mkdir -p backend/target/site/jacoco
+          mkdir -p performance/target/site/jacoco
+          mkdir -p frontend/coverage
+          mkdir -p test-generation-service
+
+          if [ -f artifacts/backend-coverage/jacoco.xml ]; then
+            cp artifacts/backend-coverage/jacoco.xml backend/target/site/jacoco/jacoco.xml
+          fi
+
+          if [ -f artifacts/performance-coverage/jacoco.xml ]; then
+            cp artifacts/performance-coverage/jacoco.xml performance/target/site/jacoco/jacoco.xml
+          fi
+
+          if [ -d artifacts/frontend-coverage ]; then
+            cp -r artifacts/frontend-coverage/* frontend/coverage/ || true
+          fi
+
+          if [ -f artifacts/test-generation-coverage-xml/coverage.xml ]; then
+            cp artifacts/test-generation-coverage-xml/coverage.xml test-generation-service/coverage.xml
+          fi
+
+      - name: Set up JDK 17 (for SonarCloud)
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'sapmachine'
+
+      - name: Build Java bytecode for Sonar
+        run: |
+          mvn -N -f pom.docker.xml install -q
+          mvn -f performance/pom.xml clean install -DskipTests -q
+          mvn -f backend/pom.xml clean compile -DskipTests -q
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Echo SonarCloud analysis links
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          echo "Sonar project: HamzaAfif_TAF-FALL-2025"
+          echo "Main dashboard: https://sonarcloud.io/project/overview?id=HamzaAfif_TAF-FALL-2025"
+          echo "Current branch dashboard: https://sonarcloud.io/dashboard?id=HamzaAfif_TAF-FALL-2025&branch=${GITHUB_REF_NAME}"
+
+          if [ -f .scannerwork/report-task.txt ]; then
+            echo "report-task.txt found:"
+            cat .scannerwork/report-task.txt
+
+            CE_TASK_URL=$(grep '^ceTaskUrl=' .scannerwork/report-task.txt | cut -d'=' -f2-)
+            if [ -n "$CE_TASK_URL" ]; then
+              echo "Polling CE task until processing completes..."
+              STATUS="PENDING"
+              for i in $(seq 1 30); do
+                curl -sS -u "${SONAR_TOKEN}:" "$CE_TASK_URL" -o /tmp/ce_task.json
+                STATUS=$(grep -o '"status":"[^"]*"' /tmp/ce_task.json | head -1 | cut -d':' -f2 | tr -d '"')
+                echo "CE task attempt ${i}: ${STATUS}"
+                if [ "$STATUS" = "SUCCESS" ] || [ "$STATUS" = "FAILED" ] || [ "$STATUS" = "CANCELED" ]; then
+                  break
+                fi
+                sleep 5
+              done
+
+              echo "Final CE task payload:"
+              cat /tmp/ce_task.json
+
+              COMPONENT_KEY=$(grep -o '"componentKey":"[^"]*"' /tmp/ce_task.json | head -1 | cut -d':' -f2 | tr -d '"')
+              ANALYSIS_ID=$(grep -o '"analysisId":"[^"]*"' /tmp/ce_task.json | head -1 | cut -d':' -f2 | tr -d '"')
+
+              if [ -n "$COMPONENT_KEY" ]; then
+                echo "Resolved componentKey: ${COMPONENT_KEY}"
+                echo "Resolved project dashboard: https://sonarcloud.io/project/overview?id=${COMPONENT_KEY}"
+                echo "Resolved branch dashboard: https://sonarcloud.io/dashboard?id=${COMPONENT_KEY}&branch=${GITHUB_REF_NAME}"
+              fi
+
+              if [ -n "$ANALYSIS_ID" ]; then
+                echo "Analysis API URL: https://sonarcloud.io/api/project_analyses/show?analysis=${ANALYSIS_ID}"
+              fi
+
+              if [ "$STATUS" = "FAILED" ] || [ "$STATUS" = "CANCELED" ]; then
+                echo "Sonar report upload succeeded but processing failed (${STATUS})."
+                echo "Check CE payload above for the exact rejection reason."
+                exit 1
+              fi
+            fi
+          else
+            echo "No .scannerwork/report-task.txt found in workspace."
+          fi
+
+  # ============================================================================
+  # Reporting: Aggregate and summarize test results
+  # ============================================================================
+  reporting:
+    needs: [ backend, frontend, performance, test-generation-service ]
+    runs-on: ubuntu-latest
+    name: Test Reports Aggregation
+    if: always()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: test-reports/
+
+      - name: Generate Summary Report
+        run: |
+          echo "# CI/CD Test Results Summary" > $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Pipeline Status" >> $GITHUB_STEP_SUMMARY
+          echo "- **Backend**: ${{ needs.backend.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend**: ${{ needs.frontend.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Performance**: ${{ needs.performance.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Test Generation Service**: ${{ needs.test-generation-service.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Artifacts Available" >> $GITHUB_STEP_SUMMARY
+          echo "- Backend JAR build" >> $GITHUB_STEP_SUMMARY
+          echo "- Frontend distribution build" >> $GITHUB_STEP_SUMMARY
+          echo "- Code coverage reports (Backend, Frontend, Performance, Python)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "[View artifacts in Actions](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment on PR with Results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const comment = `## 📊 CI/CD Pipeline Results
+            
+            | Component | Status |
+            |-----------|--------|
+            | Backend (Java/Maven) | ${{ needs.backend.result }} |
+            | Frontend (Angular) | ${{ needs.frontend.result }} |
+            | Performance (Maven) | ${{ needs.performance.result }} |
+            | Test Generation (Python) | ${{ needs.test-generation-service.result }} |
+            
+            [View detailed logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+        continue-on-error: true
+
+  # ============================================================================
+  # Documentation: Generate and publish docs to GitHub Pages (main/develop only)
+  # ============================================================================
+  documentation:
+    needs: [ backend, frontend ]
+    runs-on: ubuntu-latest
+    name: Generate & Publish Documentation
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && needs.backend.result == 'success' && needs.frontend.result == 'success'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'sapmachine'
+          cache: maven
+
+      - name: Generate Frontend Documentation (Compodoc)
+        working-directory: ./frontend
+        run: |
+          npm install --legacy-peer-deps
+          npx @compodoc/compodoc -p tsconfig.app.json -d ../docs/frontend
+
+      - name: Generate Backend OpenAPI Documentation
+        working-directory: ./backend
+        run: mvn clean package -DskipTests -q
+        continue-on-error: true
+
+      - name: Extract OpenAPI Spec
+        run: |
+          mkdir -p docs/backend
+          # Extract swagger-ui from JAR and prepare docs
+          # This is a placeholder - adjust based on your actual OpenAPI setup
+          echo "# Backend API Documentation" > docs/backend/README.md
+          echo "" >> docs/backend/README.md
+          echo "The REST API documentation is available via the running backend at:" >> docs/backend/README.md
+          echo "\`\`\`" >> docs/backend/README.md
+          echo "http://localhost:8080/swagger-ui.html" >> docs/backend/README.md
+          echo "\`\`\`" >> docs/backend/README.md
+
+      - name: Create Documentation Index
+        run: |
+          cat > docs/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>TAF - Documentation</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 40px; }
+              h1 { color: #333; }
+              .doc-link { display: block; margin: 10px 0; padding: 10px; background: #f0f0f0; text-decoration: none; border-radius: 5px; }
+              .doc-link:hover { background: #e0e0e0; }
+            </style>
+          </head>
+          <body>
+            <h1>Test Automation Framework - Documentation</h1>
+            <h2>Components</h2>
+            <a href="./frontend/index.html" class="doc-link">📱 Frontend (Angular) - Component Documentation</a>
+            <a href="./backend/README.md" class="doc-link">🔌 Backend (Java/Spring) - REST API</a>
+            <hr>
+            <p>Generated on: $(date)</p>
+          </body>
+          </html>
+          EOF
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          cname: taf-docs.example.com  # Optional: Configure if you have a custom domain
+        continue-on-error: true
+
+      - name: Echo Documentation URL
+        run: |
+          echo "📚 Documentation deployed to GitHub Pages"
+          echo "URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"

@@ -1,8 +1,0 @@
-services:
-  registry:
-    image: ${REGISTRY_BASE}/lionel-test-registry:${REGISTRY_VERSION}
-    container_name: lionel-test-registry
-    ports:
-      - "8761:8761"
-    env_file:
-      - .env

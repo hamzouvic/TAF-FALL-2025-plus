@@ -1,8 +1,0 @@
-services:
-  gateway:
-    image: ${REGISTRY_BASE}/lionel-test-gateway:${GATEWAY_VERSION}
-    container_name: lionel-test-user
-    ports:
-      - "8762:8080"
-    env_file:
-      - .env

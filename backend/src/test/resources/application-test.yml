@@ -1,0 +1,24 @@
+spring:
+  cloud:
+    discovery:
+      enabled: false
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/taf-test
+      database: taf-test
+      auto-index-creation: false
+
+eureka:
+  client:
+    enabled: false
+    registerWithEureka: false
+    fetchRegistry: false
+
+taf:
+  app:
+    jwtSecret: test-secret-for-ci-only
+    jwtExpirationMs: 3600000
+    testAPI_url: http://localhost
+    testAPI_port: 8080
+    selenium_container_url: http://localhost
+    selenium_container_port: 4444

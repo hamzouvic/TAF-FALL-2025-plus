@@ -1,3 +1,0 @@
-name: aws-eks
-description: Our EKS Cluster on AWS
-runtime: nodejs

@@ -566,8 +566,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs
-          cname: taf-docs.example.com  # Optional: Configure if you have a custom domain
-        continue-on-error: true
 
       - name: Echo Documentation URL
         run: |

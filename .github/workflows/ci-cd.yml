@@ -75,10 +75,26 @@ jobs:
       - name: Unit Tests
         working-directory: ./backend
         run: mvn test -q
+        env:
+          API_TEST_TOKEN: test-secret-for-ci-only
+          API_TEST_EXP_TIME: 3600000
+          API_TEST_URL: http://localhost
+          API_TEST_PORT: 8080
+          SELENIUM_URL: http://localhost
+          SELENIUM_PORT: 4444
+          EUREKA_CLIENT_ENABLED: false
 
       - name: Integration Tests
         working-directory: ./backend
         run: mvn failsafe:integration-test -q || true
+        env:
+          API_TEST_TOKEN: test-secret-for-ci-only
+          API_TEST_EXP_TIME: 3600000
+          API_TEST_URL: http://localhost
+          API_TEST_PORT: 8080
+          SELENIUM_URL: http://localhost
+          SELENIUM_PORT: 4444
+          EUREKA_CLIENT_ENABLED: false
 
       - name: Generate JaCoCo Coverage Report
         working-directory: ./backend

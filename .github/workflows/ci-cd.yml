@@ -336,6 +336,12 @@ jobs:
           java-version: '17'
           distribution: 'sapmachine'
 
+      - name: Build Java bytecode for Sonar
+        run: |
+          mvn -N -f pom.docker.xml install -q
+          mvn -f performance/pom.xml clean compile -DskipTests -q
+          mvn -f backend/pom.xml clean compile -DskipTests -q
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         env:

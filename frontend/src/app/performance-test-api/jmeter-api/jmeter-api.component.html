@@ -1,0 +1,413 @@
+<div class="container">
+  <div [ngBusy]="busy"></div>
+  <div id="myModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Résultat des tests</h2>
+        <span class="close" (click)="closeModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+
+        <!-- <div class="table-responsive">
+                    <table id="result_table" class="table table-striped">
+                        <thead style="background-color: bg;">
+                            <tr>
+                                <th>Label</th>
+                                <th>Thread Name</th>
+                                <th>URL</th>
+                                <th>Response Code</th>
+                                <th>Latency</th>
+                                <th>Status</th>
+                                <th>Détail</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let result of testResults">
+                                <td>{{ result.label }}</td>
+                                <td>{{ result.threadName }}</td>
+                                <td>{{ result.url }}</td>
+                                <td>{{ result.responseCode }}</td>
+                                <td>{{ result.latency }}</td>
+                                <td
+                                    [style.background-color]="result.success === 'true' ? 'rgba(60, 179, 113, 0.3)' : 'rgba(255, 0, 0, 0.2)'">
+                                    {{ result.success === 'true' ? 'Success' : 'Failed' }}
+                                </td>
+                                <td>
+                                    <button mat-raised-button style="background-color: #007bff; color: white;" (click)="showTestDetails(result)">Détail</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div> -->
+        <span *ngIf="testResult && testResult.length > 0" class="result-icon success">&#10004;</span>
+        <p *ngIf="testResult && testResult.length > 0">Le rapport a été généré avec succès.</p>
+        <button mat-raised-button class="showbutton" color="primary" (click)="showLatestReport()">Afficher le
+          rapport</button>
+      </div>
+      <div class="modal-footer">
+        <button mat-raised-button class="newtestbutton" color="accent" (click)="newTest()">Nouveau Test</button>
+        <button mat-raised-button class="closebutton" color="primary" (click)="closeModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+  <div id="detailModal" class="modal-details" *ngIf="selectedTest" (click)="closeModalOnOutsideClick($event)">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <span class="close" (click)="closeTestDetails()">&times;</span>
+        <h2>Détails du test</h2>
+      </div>
+      <div class="modal-body">
+        <p><strong>Data Type:</strong> {{ selectedTest.dataType }}</p>
+        <p><strong>Connect:</strong> {{ selectedTest.connect }}</p>
+        <p><strong>Label:</strong> {{ selectedTest.label }}</p>
+        <p><strong>Thread Name:</strong> {{ selectedTest.threadName }}</p>
+        <p><strong>URL:</strong> {{ selectedTest.url }}</p>
+        <p><strong>Response Code:</strong> {{ selectedTest.responseCode }}</p>
+        <p><strong>Latency:</strong> {{ selectedTest.latency }}</p>
+        <p><strong>Timestamp:</strong> {{ selectedTest.timestamp }}</p>
+        <p><strong>Elapsed:</strong> {{ selectedTest.elapsed }}</p>
+        <p><strong>Status:</strong> {{ selectedTest.success === 'true' ? 'Success' : 'Failed' }}</p>
+        <p><strong>Bytes:</strong> {{ selectedTest.bytes }}</p>
+        <p><strong>Response Message:</strong> {{ selectedTest.responseMessage }}</p>
+        <p><strong>Failure Message:</strong> {{ selectedTest.failureMessage }}</p>
+        <p><strong>Sent Bytes:</strong> {{ selectedTest.sentBytes }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bouton pour afficher/masquer la sidebar HTTP -->
+  <div *ngIf="showHttpButton" class="sidebar-toggle" (click)="toggleHttpSidebar()">
+    <h1>i</h1>
+  </div>
+  <div class="sidebar http-sidebar"
+    [ngClass]="{'sidebar-visible': isHttpSidebarVisible, 'sidebar-hidden': !isHttpSidebarVisible}">
+    <!-- HTTP Sidebar -->
+    <div class="sidebar-content">
+      <div class="description" id="http-description">
+        <p>
+          <br>
+          <br>
+          <b>JMeter HTTP</b>
+          <br>
+          Apache JMeter est un outil open-source de test de charge et de performance pour évaluer les performances des
+          applications web.<br>
+          Pour configurer un test avec JMeter, vous devez définir les paramètres suivants :
+          <br><br><b>Nombre d'utilisateurs :</b> Le nombre d'utilisateurs simultanés, simulant des charges
+          réalistes pour évaluer les performances de l'application dans différentes conditions de trafic.
+          <br><br><b>Temps de montée :</b> Le temps nécessaire pour augmenter progressivement le nombre
+          d'utilisateurs simultanés.
+          <br><br><b>Durée du test :</b> La durée totale du test en secondes.
+          <br><br><b>Nombre de boucles :</b> Le nombre de fois que le test sera répété.
+          <br><br><b>URL :</b> L'URL de l'application à tester.
+          <br><br><b>Port :</b> Le port à utiliser pour la connexion.
+          <br><br><b>Chemin :</b> Le chemin de l'URL après le domaine et le port.
+          <br><br><b>Protocole :</b> Le protocole à utiliser pour la connexion (ex. HTTP, HTTPS, FTP).
+          <br><br><b>Données :</b> Les données à inclure dans la requête.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bouton pour afficher/masquer la sidebar FTP -->
+  <div *ngIf="showFtpButton" class="sidebar-toggle" (click)="toggleFtpSidebar()">
+    <h1>i</h1>
+  </div>
+  <div class="sidebar ftp-sidebar"
+    [ngClass]="{'sidebar-visible': isFtpSidebarVisible, 'sidebar-hidden': !isFtpSidebarVisible}">
+    <!-- FTP Sidebar -->
+    <div class="sidebar-content">
+      <div class="description" id="ftp-description">
+        <p>
+          <br>
+          <br>
+          <b>JMeter FTP</b>
+          <br>
+          JMeter FTP Request est un service destiné à gérer les requêtes variables FTP dans Apache JMeter, un
+          outil open-source de test de charge et de performance utilisé pour évaluer les performances des
+          applications web. Cette classe est conçue pour gérer différents paramètres nécessaires à la
+          configuration des tests FTP, notamment :
+          <br><br><b>Nombre d'utilisateurs :</b> Le nombre d'utilisateurs simultanés, simulant des charges
+          réalistes pour évaluer les performances de l'application dans différentes conditions de trafic.
+          <br><br><b>Temps de montée :</b> Le temps nécessaire pour augmenter progressivement le nombre
+          d'utilisateurs simultanés.
+          <br><br><b>Durée du test :</b> La durée totale du test en secondes.
+          <br><br><b>Boucle :</b> Indique le nombre de fois que le test sera répété.
+          <br><br><b>URL :</b> Définit l'adresse du serveur FTP testé.
+          <br><br><b>Port :</b> Spécifie le port utilisé pour la connexion FTP.
+          <br><br><b>Méthode FTP :</b> Indique l'opération FTP à effectuer (ex. : Retrieve, Store).
+          <br><br><b>Fichier distant :</b> Spécifie le chemin d'accès au fichier distant pour les opérations
+          FTP.
+          <br><br><b>Fichier local :</b> Définit le chemin d'accès au fichier local utilisé dans les
+          interactions FTP.
+          <br><br><b>Nom d'utilisateur :</b> Représente le nom d'utilisateur FTP pour l'authentification.
+          <br><br><b>Mot de passe :</b> Spécifie le mot de passe FTP pour l'authentification.
+        </p>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="main" [ngClass]="{'sidebar-visible': isHttpSidebarVisible || isFtpSidebarVisible}">
+    <div class="content">
+
+      <div class="form-title">
+        <img src="assets/logo/jmeter-logo.png" alt="JMeter Icon" class="jmeter-icon">
+        <span class="hover-text">Apache JMeter : Outil de test de performance</span>
+      </div>
+      
+      <div class="ai-generator-panel">
+        <button type="button" class="btn-ai-generate" (click)="toggleAIPrompt()">
+          Générer le test avec IA
+        </button>
+
+        <div class="ai-prompt-box" *ngIf="showAIPrompt">
+          <label><strong>Décrivez le test à générer</strong></label>
+          <textarea class="form-control" [(ngModel)]="aiPrompt" [ngModelOptions]="{standalone: true}" rows="4"
+            placeholder="Ex: Génère un test HTTP GET sur /api/users avec 20 utilisateurs, ramp-up 10s, pendant 2 minutes."></textarea>
+          <button type="button" class="btn-ai-submit" (click)="generateFromPrompt()" [disabled]="aiGenerating">
+            {{ aiGenerating ? 'Génération...' : 'Générer' }}
+          </button>
+        </div>
+      </div>
+
+      <mat-horizontal-stepper [linear]="true" #stepper class="glass-stepper">
+
+        <!-- Step 1: Protocol Selection -->
+        <mat-step [stepControl]="protocolFormGroup">
+          <form [formGroup]="protocolFormGroup">
+            <ng-template matStepLabel>Protocole</ng-template>
+            <div class="step-container">
+              <div class="section-title">
+                <h2>Étape 1: Choisir le protocole</h2>
+              </div>
+              <div class="row justify-content-center">
+                <div class="form-group col-md-6">
+                  <label for="protocol"><strong>Protocole <span class="required-star">*</span></strong></label>
+                  <select class="form-control" formControlName="protocol" id="protocol">
+                    <option value="HTTP">HTTP</option>
+                    <option value="HTTPS">HTTPS</option>
+                    <option value="FTP">FTP</option>
+                  </select>
+                </div>
+              </div>
+              <div class="stepper-actions">
+                <button mat-button matStepperNext class="btn-next">Suivant</button>
+              </div>
+            </div>
+          </form>
+        </mat-step>
+
+        <!-- Step 2: Request Details -->
+        <mat-step [stepControl]="detailsFormGroup">
+          <form [formGroup]="detailsFormGroup">
+            <ng-template matStepLabel>Détails</ng-template>
+            <div class="step-container">
+              <div class="section-title">
+                <h2>Étape 2: Détails de la requête ({{ selectedProtocol }})</h2>
+              </div>
+              <div class="row">
+                <div class="form-group col">
+                  <label for="domain"><strong>URL/Domaine <span class="required-star">*</span></strong></label>
+                  <input type="text" class="form-control" formControlName="domain" placeholder="api.example.com">
+                </div>
+                <div class="form-group col-md-3">
+                  <label for="port"><strong>Port</strong></label>
+                  <input type="text" class="form-control" formControlName="port" placeholder="8080">
+                </div>
+              </div>
+
+              <!-- Specific FTP Details (Dynamic) -->
+              <div *ngIf="selectedProtocol === 'FTP'" class="additional-ftp-details">
+                <div class="row">
+                  <div class="form-group col">
+                    <label><strong>Username</strong></label>
+                    <input type="text" class="form-control" [(ngModel)]="ftp_request.username"
+                      [ngModelOptions]="{standalone: true}" placeholder="user">
+                  </div>
+                  <div class="form-group col">
+                    <label><strong>Password</strong></label>
+                    <input type="password" class="form-control" [(ngModel)]="ftp_request.password"
+                      [ngModelOptions]="{standalone: true}" placeholder="****">
+                  </div>
+                </div>
+              </div>
+
+              <div class="stepper-actions">
+                <button mat-button matStepperPrevious class="btn-prev">Retour</button>
+                <button mat-button matStepperNext class="btn-next">Suivant</button>
+              </div>
+            </div>
+          </form>
+        </mat-step>
+
+        <!-- Step 3: Parameters & Scenarios -->
+        <mat-step [stepControl]="paramsFormGroup">
+          <form [formGroup]="paramsFormGroup">
+            <ng-template matStepLabel>Paramètres</ng-template>
+            <div class="step-container">
+              <div class="section-title">
+                <h2>Étape 3: Paramètres</h2>
+              </div>
+
+              <div class="row">
+                <div class="form-group col-md-4">
+                  <label><strong>{{ selectedProtocol === 'FTP' ? 'Méthode FTP' : 'Méthode HTTP' }} <span
+                        class="required-star">*</span></strong></label>
+                  <select class="form-control" formControlName="method" *ngIf="selectedProtocol !== 'FTP'">
+                    <option>GET</option>
+                    <option>POST</option>
+                    <option>PUT</option>
+                    <option>DELETE</option>
+                    <option>PATCH</option>
+                  </select>
+                  <select class="form-control" formControlName="method" *ngIf="selectedProtocol === 'FTP'">
+                    <option>Retrieve</option>
+                    <option>Store</option>
+                  </select>
+                </div>
+                <div class="form-group col" *ngIf="selectedProtocol !== 'FTP'">
+                  <label><strong>Chemin <span class="required-star">*</span></strong></label>
+                  <input type="text" class="form-control" formControlName="path" placeholder="/api/v1/resource">
+                </div>
+                <div class="form-group col" *ngIf="selectedProtocol === 'FTP'">
+                  <label><strong>Remote File <span class="required-star">*</span></strong></label>
+                  <input type="text" class="form-control" [(ngModel)]="ftp_request.remotefile"
+                    [ngModelOptions]="{standalone: true}" placeholder="remote/path/file.txt">
+                </div>
+              </div>
+
+              <div class="row" *ngIf="selectedProtocol !== 'FTP'">
+                <div class="form-group col">
+                  <label><strong>Données (Body)</strong></label>
+                  <textarea class="form-control" formControlName="data" placeholder='{"key": "value"}'
+                    rows="3"></textarea>
+                </div>
+              </div>
+
+              <div class="stepper-actions">
+                <button mat-button matStepperPrevious class="btn-prev">Retour</button>
+                <button mat-button matStepperNext class="btn-next">Suivant</button>
+              </div>
+            </div>
+          </form>
+        </mat-step>
+
+        <!-- Step 4: Test Configuration -->
+        <mat-step [stepControl]="configFormGroup">
+          <form [formGroup]="configFormGroup">
+            <ng-template matStepLabel>Configuration</ng-template>
+            <div class="step-container">
+              <div class="section-title">
+                <h2>Étape 4: Profil de charge</h2>
+              </div>
+
+              <button type="button" class="btn-scenario-toggle" (click)="toggleGlossary()">
+                <i class="fas" [ngClass]="isGlossaryVisible ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                {{ isGlossaryVisible ? 'Masquer les profils' : 'Appliquer un profil de charge' }}
+              </button>
+
+              <div class="test-types-glossary" *ngIf="isGlossaryVisible">
+                <div class="glossary-header">
+                  <h3>Scénarios préconfigurés</h3>
+                  <span class="glossary-hint">Cliquez sur un type pour charger les paramètres de performance</span>
+                </div>
+                <div class="glossary-grid">
+                  <div class="glossary-item" (click)="selectTestType('smoke')"
+                    title="Vérification rapide des fonctions de base.">
+                    <strong>Smoke Test</strong>
+                    <span>Charge minimale pour valider la stabilité.</span>
+                  </div>
+                  <div class="glossary-item" (click)="selectTestType('load')"
+                    title="Performance sous une charge normale prévue.">
+                    <strong>Load Test</strong>
+                    <span>Simule le trafic utilisateur attendu.</span>
+                  </div>
+                  <div class="glossary-item" (click)="selectTestType('stress')" title="Trouver les limites du système.">
+                    <strong>Stress Test</strong>
+                    <span>Pousse le système jusqu'à ses limites.</span>
+                  </div>
+                  <div class="glossary-item" (click)="selectTestType('spike')" title="Pic de trafic soudain.">
+                    <strong>Spike Test</strong>
+                    <span>Vérifie la robustesse face aux pics.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="form-group col-md-6">
+                  <label><strong>Nombre d'utilisateurs <span class="required-star">*</span></strong></label>
+                  <input type="text" class="form-control" formControlName="nbThreads" placeholder="10">
+                </div>
+                <div class="form-group col-md-6">
+                  <label><strong>Temps de montée (s)</strong></label>
+                  <input type="text" class="form-control" formControlName="rampTime" placeholder="5">
+                </div>
+              </div>
+              <div class="row">
+                <div class="form-group col-md-6">
+                  <label><strong>Durée du test (s)</strong></label>
+                  <input type="text" class="form-control" formControlName="duration" placeholder="60">
+                </div>
+                <div class="form-group col-md-6">
+                  <label><strong>Nombre de boucles <span class="required-star">*</span></strong></label>
+                  <input type="text" class="form-control" formControlName="loop" placeholder="1">
+                </div>
+              </div>
+              <div class="stepper-actions">
+                <button mat-button matStepperPrevious class="btn-prev">Retour</button>
+                <button mat-button matStepperNext class="btn-next">Suivant</button>
+              </div>
+            </div>
+          </form>
+        </mat-step>
+
+        <!-- Step 5: Review -->
+        <mat-step>
+          <ng-template matStepLabel>Révision</ng-template>
+          <div class="step-container">
+            <div class="section-title">
+              <h2>Étape 5: Récapitulatif</h2>
+            </div>
+
+            <div class="review-card">
+              <div class="review-section">
+                <h4>Cibles</h4>
+                <p><strong>Protocole:</strong> {{ selectedProtocol }}</p>
+                <p><strong>URL:</strong> {{ detailsFormGroup.get('domain')?.value }}</p>
+                <p *ngIf="detailsFormGroup.get('port')?.value"><strong>Port:</strong> {{
+                  detailsFormGroup.get('port')?.value }}</p>
+              </div>
+              <hr>
+              <div class="review-section">
+                <h4>Requête</h4>
+                <p><strong>Méthode:</strong> {{ paramsFormGroup.get('method')?.value }}</p>
+                <p *ngIf="selectedProtocol !== 'FTP'"><strong>Chemin:</strong> {{ paramsFormGroup.get('path')?.value }}
+                </p>
+                <p *ngIf="selectedProtocol === 'FTP'"><strong>Remote File:</strong> {{ ftp_request.remotefile }}</p>
+              </div>
+              <hr>
+              <div class="review-section">
+                <h4>Profil de charge</h4>
+                <div class="row">
+                  <div class="col-md-6">
+                    <p><strong>Nombre d'utilisateurs:</strong> {{ configFormGroup.get('nbThreads')?.value }}</p>
+                    <p><strong>Temps de montée:</strong> {{ configFormGroup.get('rampTime')?.value }}s</p>
+                  </div>
+                  <div class="col-md-6">
+                    <p><strong>Durée:</strong> {{ configFormGroup.get('duration')?.value }}s</p>
+                    <p><strong>Boucles:</strong> {{ configFormGroup.get('loop')?.value }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="stepper-actions">
+              <button mat-button matStepperPrevious class="btn-prev">Retour</button>
+              <button mat-button class="btn-launch" (click)="onFinalSubmit()">Lancer le test</button>
+            </div>
+          </div>
+        </mat-step>
+
+      </mat-horizontal-stepper>
+    </div>
+  </div>

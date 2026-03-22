@@ -1,7 +1,0 @@
-backend/Dockerfile
-backend/pom.xml
-backend/src/main/resources/application.yml
-backend/src/main/resources/application.yml
-backend/src/main/java/ca/etsmtl/taf/TestAutomationFrameworkApplication.java
-backend/src/main/java/ca/etsmtl/taf/controller/AuthController.java
-backend/src/main/java/ca/etsmtl/taf/jmeter/ApplicationStartupListenerBean.java

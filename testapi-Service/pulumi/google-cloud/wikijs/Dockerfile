@@ -1,1 +1,0 @@
-FROM ghcr.io/requarks/wiki:2.5.292

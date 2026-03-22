@@ -1,6 +1,0 @@
-services:
-  auth:
-    image: ${REGISTRY_BASE}/lionel-test-user:${USER_VERSION}
-    build:
-      context: .
-      dockerfile: Dockerfile

@@ -1,8 +1,0 @@
-services:
-  auth:
-    image: ${REGISTRY_BASE}/lionel-test-auth:${AUTH_VERSION}
-    build:
-      context: .
-      dockerfile: Dockerfile
-    env_file:
-      - .env

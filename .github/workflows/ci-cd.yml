@@ -549,28 +549,24 @@ jobs:
 
           # Fallback: ensure the javadoc URL always resolves even if generation failed.
           if [ ! -f docs/backend/javadoc/index.html ]; then
-            cat > docs/backend/javadoc/index.html <<'HTML_JAVADOC_FALLBACK'
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <meta charset="utf-8" />
-              <meta name="viewport" content="width=device-width, initial-scale=1" />
-              <title>JavaDoc indisponible</title>
-              <style>
-                body { font-family: Arial, sans-serif; margin: 32px; }
-                .box { border: 1px solid #ddd; border-radius: 8px; padding: 16px; max-width: 720px; }
-              </style>
-            </head>
-            <body>
-              <div class="box">
-                <h1>JavaDoc indisponible pour ce build</h1>
-                <p>La génération JavaDoc a échoué ou n'a produit aucun fichier.</p>
-                <p>Consultez les logs du job Documentation dans GitHub Actions pour le détail.</p>
-                <p><a href="../index.html">Retour à la documentation backend</a></p>
-              </div>
-            </body>
-            </html>
-          HTML_JAVADOC_FALLBACK
+            {
+              echo "<!DOCTYPE html>"
+              echo "<html><head><meta charset=\"utf-8\" /><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />"
+              echo "<title>Référence Backend (mode simplifié)</title>"
+              echo "<style>body{font-family:Arial,sans-serif;margin:24px}.card{border:1px solid #ddd;border-radius:8px;padding:16px;max-width:960px}code{background:#f5f5f5;padding:2px 4px;border-radius:4px}</style>"
+              echo "</head><body><div class=\"card\">"
+              echo "<h1>Référence Backend (mode simplifié)</h1>"
+              echo "<p>La génération JavaDoc standard n'a pas abouti pour ce build. Cette page fournit une référence statique des classes backend publiées.</p>"
+              echo "<p><a href=\"../index.html\">Retour à la documentation backend</a></p>"
+              echo "<h2>Classes détectées</h2><ul>"
+              find backend/src/main/java -name '*.java' | sort | while read -r file; do
+                rel="${file#backend/src/main/java/}"
+                echo "<li><code>${rel}</code></li>"
+              done
+              echo "</ul>"
+              echo "</div></body></html>"
+            } > docs/backend/javadoc/index.html
+
           fi
 
           # Build a simple endpoint catalog from controller annotations.

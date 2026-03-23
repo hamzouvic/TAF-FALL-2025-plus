@@ -519,14 +519,47 @@ jobs:
           npm install --legacy-peer-deps
           npx @compodoc/compodoc -p tsconfig.app.json -d ../docs/frontend --name "TAF UI" --disableGraph
 
+      - name: Install Parent POM
+        run: mvn -N -f pom.docker.xml install -q
+
+      - name: Build Performance Module (for backend dependencies)
+        run: mvn -f performance/pom.xml clean install -DskipTests -q
+
       - name: Build Backend Artifacts
         working-directory: ./backend
         run: mvn clean package -DskipTests -q
 
-      - name: Generate Backend JavaDoc
+      - name: Generate Backend JavaDoc with Dependencies
         working-directory: ./backend
-        run: mvn javadoc:javadoc -DskipTests -Dmaven.javadoc.failOnError=false -q
-        continue-on-error: true
+        run: |
+          # Build Maven classpath with all compile dependencies
+          CLASSPATH=$(mvn dependency:build-classpath -Dmdep.outputFile=/dev/stdout -q 2>/dev/null)
+          CLASSPATH="target/classes:${CLASSPATH}"
+          
+          # Extract Java source files from packages
+          SRC_FILES=$(find src/main/java -name '*.java' -type f)
+          
+          if [ -n "$SRC_FILES" ]; then
+            javadoc \
+              -quiet \
+              -Xdoclint:none \
+              -encoding UTF-8 \
+              -source 17 \
+              -classpath "$CLASSPATH" \
+              -sourcepath src/main/java \
+              -d target/site/apidocs \
+              -author \
+              -version \
+              -use \
+              -private \
+              ca.etsmtl.taf \
+              ca.etsmtl.taf.controller \
+              ca.etsmtl.taf.entity \
+              ca.etsmtl.taf.service \
+              ca.etsmtl.taf.repository \
+              ca.etsmtl.taf.dto \
+              2>&1 | grep -E '(error|Error|ERROR)' | head -10 || true
+          fi
 
       - name: Build Backend Docs Site
         shell: bash
@@ -534,40 +567,79 @@ jobs:
           mkdir -p docs/backend
           mkdir -p docs/backend/javadoc
 
-          if [ -d backend/target/site/apidocs ]; then
+          # Copy JavaDoc if it was generated successfully
+          if [ -f backend/target/site/apidocs/index.html ]; then
             cp -r backend/target/site/apidocs/* docs/backend/javadoc/
+            echo "✓ JavaDoc generated successfully"
+          else
+            echo "⚠ JavaDoc generation did not produce index.html"
           fi
 
-          # Secondary attempt: generate JavaDoc from compiled classes with Maven dependencies on classpath.
+          # Fallback: Generate enhanced reference page with class structure if javadoc didn't create index.html
           if [ ! -f docs/backend/javadoc/index.html ]; then
             mkdir -p docs/backend/javadoc
-            SRC_FILES=$(find backend/src/main/java -name '*.java' | paste -sd: -)
-            CP="backend/target/classes:$(find ~/.m2/repository -name '*.jar' | paste -sd: -)"
-            if [ -n "$SRC_FILES" ] && [ -f backend/target/classes/ca/etsmtl/taf/TestAutomationFrameworkApplication.class ]; then
-              javadoc -quiet -Xdoclint:none -encoding UTF-8 -source 17 -classpath "$CP" -sourcepath backend/src/main/java -d docs/backend/javadoc ca.etsmtl.taf ca.etsmtl.taf.controller ca.etsmtl.taf.entity ca.etsmtl.taf.service 2>&1 | grep -v 'warning' | head -5 || true
-            fi
-          fi
-
-          # Fallback: ensure the javadoc URL always resolves even if generation failed.
-          if [ ! -f docs/backend/javadoc/index.html ]; then
             {
               echo "<!DOCTYPE html>"
               echo "<html><head><meta charset=\"utf-8\" /><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />"
-              echo "<title>Référence Backend (mode simplifié)</title>"
-              echo "<style>body{font-family:Arial,sans-serif;margin:24px}.card{border:1px solid #ddd;border-radius:8px;padding:16px;max-width:960px}code{background:#f5f5f5;padding:2px 4px;border-radius:4px}</style>"
-              echo "</head><body><div class=\"card\">"
-              echo "<h1>Référence Backend (mode simplifié)</h1>"
-              echo "<p>La génération JavaDoc standard n'a pas abouti pour ce build. Cette page fournit une référence statique des classes backend publiées.</p>"
-              echo "<p><a href=\"../index.html\">Retour à la documentation backend</a></p>"
-              echo "<h2>Classes détectées</h2><ul>"
-              find backend/src/main/java -name '*.java' | sort | while read -r file; do
-                rel="${file#backend/src/main/java/}"
-                echo "<li><code>${rel}</code></li>"
+              echo "<title>Référence API Backend</title>"
+              echo "<style>"
+              echo "body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }"
+              echo ".container { max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }"
+              echo "h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }"
+              echo "h2 { color: #34495e; margin-top: 30px; }"
+              echo ".package { background: #f0f7ff; border-left: 4px solid #3498db; padding: 15px; margin: 15px 0; border-radius: 4px; }"
+              echo ".class-name { font-weight: bold; color: #2980b9; font-family: 'Courier New', monospace; }"
+              echo ".file-path { color: #7f8c8d; font-size: 0.9em; font-family: 'Courier New', monospace; }"
+              echo ".warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px; color: #856404; }"
+              echo "ul { margin: 10px 0; padding-left: 20px; }"
+              echo "li { margin: 8px 0; }"
+              echo ".back-link { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ecf0f1; }"
+              echo "a { color: #3498db; text-decoration: none; }"
+              echo "a:hover { text-decoration: underline; }"
+              echo "</style>"
+              echo "</head><body><div class=\"container\">"
+              echo "<h1>📚 Référence API Backend</h1>"
+              echo "<div class=\"warning\">"
+              echo "<strong>⚠️ Attention:</strong> Cette page fournit une référence des classes extraites du code source. "
+              echo "Pour la documentation JavaDoc complète avec descriptions détaillées, commentaires et exemples, "
+              echo "veuillez consulter la <a href='#'>version JavaDoc complète</a> (en cours de génération)."
+              echo "</div>"
+              echo "<h2>Packages et Classes Détectés</h2>"
+              
+              # Extract and organize classes by package
+              find backend/src/main/java -name '*.java' -type f | sort | while read -r filepath; do
+                # Get the class name and package
+                filename="\$(basename \"\$filepath\")"
+                relpath="\${filepath#backend/src/main/java/}"
+                pkgname=\$(sed -n 's/^package \(.*\);/\1/p' "\$filepath" 2>/dev/null || echo "default")
+                
+                # Extract method signatures and class declarations
+                classname=\$(sed -n 's/^.*class \([^ {<]*\).*/\1/p' "\$filepath" 2>/dev/null | head -1)
+                
+                if [ -n "\$classname" ]; then
+                  echo "<div class=\"package\">"
+                  echo "<div class=\"class-name\">${pkgname}.${classname}</div>"
+                  echo "<div class=\"file-path\">📄 \$relpath</div>"
+                  
+                  # Extract public methods (simplified)
+                  echo "<strong>Méthodes publiques:</strong>"
+                  echo "<ul>"
+                  grep -E '^\s+public\s+' "\$filepath" 2>/dev/null | head -5 | while read -r method; do
+                    # Clean up the method signature
+                    method_clean=\$(echo \"\$method\" | sed 's/^[ \t]*//' | sed 's/{.*//' | sed 's/;.*/.../  ')
+                    echo \"<li><code>\${method_clean}</code></li>\"
+                  done
+                  echo "</ul>"
+                  echo "</div>"
+                fi
               done
-              echo "</ul>"
+              
+              echo "<div class=\"back-link\">"
+              echo "<p><a href=\"../index.html\">← Retour à l'accueil de la documentation</a></p>"
+              echo "<p><em>Généré le: \$(date '+%Y-%m-%d %H:%M:%S UTC')</em></p>"
+              echo "</div>"
               echo "</div></body></html>"
             } > docs/backend/javadoc/index.html
-
           fi
 
           # Build a simple endpoint catalog from controller annotations.

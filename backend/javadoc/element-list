@@ -1,4 +1,6 @@
 ca.etsmtl.taf
 ca.etsmtl.taf.controller
+ca.etsmtl.taf.dto
 ca.etsmtl.taf.entity
+ca.etsmtl.taf.repository
 ca.etsmtl.taf.service

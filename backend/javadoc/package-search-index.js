@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"ca.etsmtl.taf"},{"l":"ca.etsmtl.taf.controller"},{"l":"ca.etsmtl.taf.entity"},{"l":"ca.etsmtl.taf.service"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"ca.etsmtl.taf"},{"l":"ca.etsmtl.taf.controller"},{"l":"ca.etsmtl.taf.dto"},{"l":"ca.etsmtl.taf.entity"},{"l":"ca.etsmtl.taf.repository"},{"l":"ca.etsmtl.taf.service"}];updateSearchResults();

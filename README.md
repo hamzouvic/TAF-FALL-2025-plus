@@ -147,6 +147,20 @@ docker run --rm -p 8080:8080 docker.io/hamzaafif/taf-backend:main
 
 Pour un environnement complet (MongoDB + backend + frontend + selenium + service python), utiliser Compose.
 
+## 🎨 Diagrammes Architecture (Mermaid)
+
+Diagrammes automatiquement générés pour visualiser l'architecture et les flux du projet:
+
+- **[📐 Diagrammes complets](./docs/diagrams/README.md)** - Vue d'ensemble architecture, pipeline CI/CD, flux test, dépendances, déploiement
+- **Architecture générale**: Composants backend, frontend, services
+- **Pipeline CI/CD**: Stages de build, test, qualité, documentation
+- **Flux d'exécution test**: Séquence détaillée utilisateur → résultats
+- **Dépendances modules**: Interactions entre composants Java et Angular
+- **Déploiement**: Infrastructure locale vs production, Docker registry
+- **Test Pyramid**: Couverture unitaires, intégration, E2E
+
+Les diagrammes sont générés automatiquement dans le pipeline et intégrés dans la documentation GitHub Pages.
+
 ## SonarCloud
 
 Projet SonarCloud:

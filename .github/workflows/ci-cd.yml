@@ -662,10 +662,55 @@ jobs:
         continue-on-error: true
 
   # ============================================================================
+  # Diagrams: Generate Mermaid diagrams (PlantUML alternative)
+  # ============================================================================
+  diagrams:
+    runs-on: ubuntu-latest
+    name: Generate Diagrams (Mermaid)
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install mermaid-cli
+        run: npm install -g @mermaid-js/mermaid-cli
+
+      - name: Create output directory
+        run: mkdir -p docs/diagrams/generated
+
+      - name: Generate Mermaid diagrams as SVG
+        working-directory: ./docs/diagrams
+        run: |
+          echo "Generating Mermaid diagrams..."
+          mmdc -i architecture.mmd -o generated/architecture.svg --theme dark --backgroundColor white
+          mmdc -i ci-cd-pipeline.mmd -o generated/ci-cd-pipeline.svg --theme dark --backgroundColor white
+          mmdc -i test-execution-flow.mmd -o generated/test-execution-flow.svg --theme dark --backgroundColor white
+          mmdc -i module-dependencies.mmd -o generated/module-dependencies.svg --theme dark --backgroundColor white
+          mmdc -i deployment.mmd -o generated/deployment.svg --theme dark --backgroundColor white
+          mmdc -i test-pyramid.mmd -o generated/test-pyramid.svg --theme dark --backgroundColor white
+          echo "✅ Diagrams generated successfully"
+
+      - name: List generated files
+        run: |
+          echo "Generated diagram files:"
+          ls -lh docs/diagrams/generated/
+
+      - name: Upload diagrams artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mermaid-diagrams
+          path: docs/diagrams/generated/
+          retention-days: 30
+
+  # ============================================================================
   # Documentation: Generate and publish docs to GitHub Pages (main/develop only)
   # ============================================================================
   documentation:
-    needs: [ backend, frontend ]
+    needs: [ backend, frontend, diagrams ]
     runs-on: ubuntu-latest
     name: Generate & Publish Documentation
     if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && needs.backend.result == 'success' && needs.frontend.result == 'success'
@@ -674,6 +719,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+
+      - name: Download generated diagrams
+        uses: actions/download-artifact@v4
+        with:
+          name: mermaid-diagrams
+          path: docs/diagrams/generated/
+        continue-on-error: true
 
       - name: Set up Node.js
         uses: actions/setup-node@v5

@@ -27,8 +27,13 @@ if (-not $mmdc) {
     npm install -g @mermaid-js/mermaid-cli
 }
 
-# Set Puppeteer config for Chromium sandbox
-$PUPPETEER_CONFIG = '{"args":["--no-sandbox","--disable-setuid-sandbox"]}'
+# Set Puppeteer config file for Chromium sandbox
+$PUPPETEER_CONFIG_PATH = Join-Path $DIAGRAMS_DIR "puppeteer-config.json"
+@'
+{
+    "args": ["--no-sandbox", "--disable-setuid-sandbox"]
+}
+'@ | Set-Content -Path $PUPPETEER_CONFIG_PATH -Encoding UTF8
 
 # Generate Mermaid diagrams
 $mermaidFiles = @(
@@ -51,7 +56,7 @@ foreach ($file in $mermaidFiles) {
          --backgroundColor white `
          --width 1200 `
          --height 800 `
-         --puppeteerConfig $PUPPETEER_CONFIG
+            -p $PUPPETEER_CONFIG_PATH
 }
 
 Write-Host ""

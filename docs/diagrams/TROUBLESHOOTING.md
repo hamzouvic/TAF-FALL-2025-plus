@@ -8,13 +8,16 @@ L'erreur survient quand `mermaid-cli` utilise Puppeteer pour générer les diagr
 ### ✅ Solution
 
 #### 1. **GitHub Actions (CI/CD)** - ✅ Fixed
-Le workflow CI/CD utilise maintenant `--puppeteerConfig` avec les flags sandbox:
+Le workflow CI/CD utilise maintenant `-p puppeteer-config.json` (compatible mmdc ancien et récent):
 ```yaml
 - name: Generate Mermaid diagrams as SVG
   run: |
-    PUPPETEER_CONFIG='{"args":["--no-sandbox","--disable-setuid-sandbox"]}'
-    mmdc -i architecture.mmd -o generated/architecture.svg \
-      --puppeteerConfig "$PUPPETEER_CONFIG"
+    cat > puppeteer-config.json <<'JSON'
+    {
+      "args": ["--no-sandbox", "--disable-setuid-sandbox"]
+    }
+    JSON
+    mmdc -p puppeteer-config.json -i architecture.mmd -o generated/architecture.svg
 ```
 
 #### 2. **Localement (macOS/Linux)**
@@ -25,10 +28,14 @@ Utiliser le script `generate-diagrams.sh` qui inclut déjà la config:
 
 Ou manuellement avec le flag:
 ```bash
-PUPPETEER_CONFIG='{"args":["--no-sandbox","--disable-setuid-sandbox"]}'
-mmdc -i docs/diagrams/architecture.mmd \
-  -o docs/diagrams/generated/architecture.svg \
-  --puppeteerConfig "$PUPPETEER_CONFIG"
+cat > docs/diagrams/puppeteer-config.json <<'JSON'
+{
+  "args": ["--no-sandbox", "--disable-setuid-sandbox"]
+}
+JSON
+mmdc -p docs/diagrams/puppeteer-config.json \
+  -i docs/diagrams/architecture.mmd \
+  -o docs/diagrams/generated/architecture.svg
 ```
 
 #### 3. **Windows PowerShell** - ✅ Fixed
@@ -42,8 +49,12 @@ Le script `generate-diagrams.ps1` inclut maintenant la config Puppeteer:
 docker run --rm -v $(pwd):/data node:20-alpine sh -c "
   npm install -g @mermaid-js/mermaid-cli
   cd /data/docs/diagrams
-  PUPPETEER_CONFIG='{\"args\":[\"--no-sandbox\",\"--disable-setuid-sandbox\"]}'
-  mmdc -i architecture.mmd -o generated/architecture.svg --puppeteerConfig \"\$PUPPETEER_CONFIG\"
+  cat > puppeteer-config.json <<'JSON'
+  {
+    \"args\": [\"--no-sandbox\", \"--disable-setuid-sandbox\"]
+  }
+  JSON
+  mmdc -p puppeteer-config.json -i architecture.mmd -o generated/architecture.svg
 "
 ```
 
@@ -92,10 +103,14 @@ export NODE_OPTIONS="--max-old-space-size=2048"
 
 ```bash
 # Test simple - générer un seul diagramme
-PUPPETEER_CONFIG='{"args":["--no-sandbox","--disable-setuid-sandbox"]}'
-mmdc -i docs/diagrams/architecture.mmd \
-     -o test.svg \
-     --puppeteerConfig "$PUPPETEER_CONFIG"
+cat > docs/diagrams/puppeteer-config.json <<'JSON'
+{
+  "args": ["--no-sandbox", "--disable-setuid-sandbox"]
+}
+JSON
+mmdc -p docs/diagrams/puppeteer-config.json \
+  -i docs/diagrams/architecture.mmd \
+  -o test.svg
 
 # Vérifier le résultat
 ls -lh test.svg

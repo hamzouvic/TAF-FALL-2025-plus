@@ -5,8 +5,8 @@ WORKDIR /build
 # Copy simplified Docker-specific parent POM (backend only)
 COPY pom.docker.xml ./pom.xml
 
-# Copy simplified backend POM (with performance module dependencies)
-COPY backend/pom.docker.xml ./backend/pom.xml
+# Copy backend POM used by CI/local builds
+COPY backend/pom.xml ./backend/pom.xml
 
 # Copy performance POM
 COPY performance/pom.xml ./performance/pom.xml
@@ -21,8 +21,8 @@ COPY backend/src ./backend/src
 COPY performance/gatling/src ./performance/gatling/src
 COPY performance/jmeter/src ./performance/jmeter/src
 
-# Build the application (including performance modules)
-RUN mvn clean package -DskipTests -B
+# Build the application (including required modules) without compiling/running tests
+RUN mvn clean package -Dmaven.test.skip=true -B -pl backend -am
 
 # Runtime stage with JMeter
 FROM eclipse-temurin:17-jre

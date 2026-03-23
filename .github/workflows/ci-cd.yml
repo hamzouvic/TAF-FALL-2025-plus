@@ -609,25 +609,25 @@ jobs:
               # Extract and organize classes by package
               find backend/src/main/java -name '*.java' -type f | sort | while read -r filepath; do
                 # Get the class name and package
-                filename="\$(basename \"\$filepath\")"
-                relpath="\${filepath#backend/src/main/java/}"
-                pkgname=\$(sed -n 's/^package \(.*\);/\1/p' "\$filepath" 2>/dev/null || echo "default")
+                filename="$(basename "$filepath")"
+                relpath="${filepath#backend/src/main/java/}"
+                pkgname=$(sed -n 's/^package \(.*\);/\1/p' "$filepath" 2>/dev/null || echo "default")
                 
                 # Extract method signatures and class declarations
-                classname=\$(sed -n 's/^.*class \([^ {<]*\).*/\1/p' "\$filepath" 2>/dev/null | head -1)
+                classname=$(sed -n 's/^.*class \([^ {<]*\).*/\1/p' "$filepath" 2>/dev/null | head -1)
                 
-                if [ -n "\$classname" ]; then
+                if [ -n "$classname" ]; then
                   echo "<div class=\"package\">"
                   echo "<div class=\"class-name\">${pkgname}.${classname}</div>"
-                  echo "<div class=\"file-path\">📄 \$relpath</div>"
+                  echo "<div class=\"file-path\">📄 $relpath</div>"
                   
                   # Extract public methods (simplified)
                   echo "<strong>Méthodes publiques:</strong>"
                   echo "<ul>"
-                  grep -E '^\s+public\s+' "\$filepath" 2>/dev/null | head -5 | while read -r method; do
+                  grep -E '^\s+public\s+' "$filepath" 2>/dev/null | head -5 | while read -r method; do
                     # Clean up the method signature
-                    method_clean=\$(echo \"\$method\" | sed 's/^[ \t]*//' | sed 's/{.*//' | sed 's/;.*/.../  ')
-                    echo \"<li><code>\${method_clean}</code></li>\"
+                    method_clean=$(echo "$method" | sed 's/^[ \t]*//' | sed 's/{.*//' | sed 's/;.*/.../  ')
+                    echo "<li><code>${method_clean}</code></li>"
                   done
                   echo "</ul>"
                   echo "</div>"
@@ -636,7 +636,7 @@ jobs:
               
               echo "<div class=\"back-link\">"
               echo "<p><a href=\"../index.html\">← Retour à l'accueil de la documentation</a></p>"
-              echo "<p><em>Généré le: \$(date '+%Y-%m-%d %H:%M:%S UTC')</em></p>"
+              echo "<p><em>Généré le: $(date '+%Y-%m-%d %H:%M:%S UTC')</em></p>"
               echo "</div>"
               echo "</div></body></html>"
             } > docs/backend/javadoc/index.html

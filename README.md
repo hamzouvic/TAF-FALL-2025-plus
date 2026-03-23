@@ -1,12 +1,14 @@
 ![Logo TAF](./logo_taf.png)
 
-# TAF Refactored - TP2 MGL7760 (ETS)
+# TAF Refactored - TP2 MGL7760 (UQAM)
 
 [![Build Status](https://github.com/HamzaAfif/TAF-FALL-2025/workflows/CI%2FCD%20Pipeline/badge.svg?branch=main)](https://github.com/HamzaAfif/TAF-FALL-2025/actions)
 [![SonarCloud Coverage](https://sonarcloud.io/api/project_badges/measure?project=HamzaAfif_TAF-FALL-2025&metric=coverage)](https://sonarcloud.io/project/overview?id=HamzaAfif_TAF-FALL-2025)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=HamzaAfif_TAF-FALL-2025&metric=alert_status)](https://sonarcloud.io/project/overview?id=HamzaAfif_TAF-FALL-2025)
 
-Ce depot contient une version refactoree du TAF (Test Automation Framework) realisee dans le cadre du cours MGL7760 a l'ETS, dans le contexte du TP2.
+Ce depot contient une version refactoree du TAF (Test Automation Framework) realisee dans le cadre du TP2 du cours MGL7760 a l'UQAM.
+
+Le projet TAF original provient d'un projet etudiant de l'ETS. Cette version refactoree vise a le rendre plus simple a manipuler, plus stable a executer et plus facile a faire evoluer.
 
 L'objectif est de maintenir une base de code plus stable, testable et observable, avec:
 - un backend Spring Boot
@@ -15,9 +17,9 @@ L'objectif est de maintenir une base de code plus stable, testable et observable
 - un service Python de generation de tests
 - un pipeline CI/CD complet avec analyse SonarCloud et publication de documentation
 
-## Contexte TP2 (MGL7760)
+## Contexte TP2 (MGL7760 - UQAM)
 
-Cette version "TAF-Refactored" formalise le travail de refactorisation demande dans le TP2:
+Cette version "TAF-Refactored" formalise le travail de refactorisation demande dans le TP2, a partir de la base etudiante issue de l'ETS:
 - reduction de la dette technique
 - stabilisation des tests et du pipeline
 - standardisation des processus d'integration continue

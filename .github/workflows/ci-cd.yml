@@ -538,6 +538,15 @@ jobs:
             cp -r backend/target/site/apidocs/* docs/backend/javadoc/
           fi
 
+          # Secondary attempt: generate JavaDoc directly with JDK tool if Maven output is missing.
+          if [ ! -f docs/backend/javadoc/index.html ]; then
+            mkdir -p docs/backend/javadoc
+            SRC_FILES=$(find backend/src/main/java -name '*.java' | tr '\n' ' ')
+            if [ -n "$SRC_FILES" ]; then
+              javadoc -quiet -Xdoclint:none -encoding UTF-8 -source 17 -d docs/backend/javadoc $SRC_FILES || true
+            fi
+          fi
+
           # Fallback: ensure the javadoc URL always resolves even if generation failed.
           if [ ! -f docs/backend/javadoc/index.html ]; then
             cat > docs/backend/javadoc/index.html <<'HTML_JAVADOC_FALLBACK'

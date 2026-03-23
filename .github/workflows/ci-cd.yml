@@ -561,7 +561,7 @@ jobs:
               </div>
             </body>
             </html>
-HTML_JAVADOC_FALLBACK
+          HTML_JAVADOC_FALLBACK
           fi
 
           # Build a simple endpoint catalog from controller annotations.
@@ -629,7 +629,7 @@ HTML_JAVADOC_FALLBACK
             </div>
           </body>
           </html>
-HTML_BACKEND_INDEX
+          HTML_BACKEND_INDEX
 
           # Backward compatibility for old links pointing to backend/README.md.
           cat > docs/backend/README.md <<'MD_BACKEND_README'
@@ -640,7 +640,7 @@ HTML_BACKEND_INDEX
           - [Ouvrir la documentation backend](./index.html)
           - [Ouvrir le catalogue des endpoints](./endpoints.html)
           - [Ouvrir JavaDoc](./javadoc/index.html)
-MD_BACKEND_README
+          MD_BACKEND_README
 
       - name: Create Documentation Index
         shell: bash
@@ -667,7 +667,7 @@ MD_BACKEND_README
             <p>Généré le : ${GENERATED_AT}</p>
           </body>
           </html>
-HTML_MAIN_INDEX
+          HTML_MAIN_INDEX
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

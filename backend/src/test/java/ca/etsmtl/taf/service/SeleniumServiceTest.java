@@ -1,129 +1,91 @@
 package ca.etsmtl.taf.service;
 
+import ca.etsmtl.taf.apiCommunication.SeleniumServiceRequester;
 import ca.etsmtl.taf.dto.SeleniumCaseDto;
 import ca.etsmtl.taf.entity.SeleniumCaseResponse;
-import ca.etsmtl.taf.apiCommunication.SeleniumServiceRequester;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@DisplayName("SeleniumService - Test Case Processing")
+@ExtendWith(MockitoExtension.class)
+@DisplayName("SeleniumService - Unit")
 class SeleniumServiceTest {
 
-    @Autowired
-    private SeleniumService seleniumService;
-
-    @MockBean
+    @Mock
     private SeleniumServiceRequester seleniumServiceRequester;
 
-    private List<SeleniumCaseDto> testCases;
+    @InjectMocks
+    private SeleniumService seleniumService;
 
-    @BeforeEach
-    void setUp() {
-        testCases = new ArrayList<>();
-        SeleniumCaseDto testCase = new SeleniumCaseDto();
-        testCase.setTestName("Login Test");
-        testCase.setUrl("https://example.com");
-        testCases.add(testCase);
+    private SeleniumCaseDto buildCase(int id, String name) {
+        try {
+            SeleniumCaseDto dto = new SeleniumCaseDto();
+            Field idField = SeleniumCaseDto.class.getDeclaredField("case_id");
+            idField.setAccessible(true);
+            idField.set(dto, id);
+
+            Field nameField = SeleniumCaseDto.class.getDeclaredField("caseName");
+            nameField.setAccessible(true);
+            nameField.set(dto, name);
+            return dto;
+        } catch (ReflectiveOperationException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     @Test
-    @DisplayName("Should process single test case successfully")
-    void testSendSingleTestCase() {
+    @DisplayName("sendTestCases should return empty list for empty input")
+    void sendTestCasesEmpty() throws Exception {
+        List<SeleniumCaseResponse> result = seleniumService.sendTestCases(new ArrayList<>());
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @DisplayName("sendTestCases should map one request to one response")
+    void sendTestCasesSingle() throws Exception {
         SeleniumCaseResponse response = new SeleniumCaseResponse();
-        response.setTestName("Login Test");
-        response.setStatus("PASSED");
+        response.setOutput("single");
+        response.setSuccess(true);
 
         when(seleniumServiceRequester.sendTestCase(any())).thenReturn(Mono.just(response));
 
-        List<SeleniumCaseResponse> results = seleniumService.sendTestCases(testCases);
+        List<SeleniumCaseResponse> result = seleniumService.sendTestCases(List.of(buildCase(1, "Case 1")));
 
-        assertNotNull(results);
-        assertEquals(1, results.size());
-        assertEquals("PASSED", results.get(0).getStatus());
+        assertEquals(1, result.size());
+        assertEquals("single", result.get(0).getOutput());
+        verify(seleniumServiceRequester, times(1)).sendTestCase(any());
     }
 
     @Test
-    @DisplayName("Should process multiple test cases")
-    void testSendMultipleTestCases() {
-        SeleniumCaseDto testCase2 = new SeleniumCaseDto();
-        testCase2.setTestName("Logout Test");
-        testCase2.setUrl("https://example.com/logout");
-        testCases.add(testCase2);
+    @DisplayName("sendTestCases should process all items")
+    void sendTestCasesMultiple() throws Exception {
+        SeleniumCaseResponse r1 = new SeleniumCaseResponse();
+        r1.setOutput("r1");
+        SeleniumCaseResponse r2 = new SeleniumCaseResponse();
+        r2.setOutput("r2");
 
-        SeleniumCaseResponse response1 = new SeleniumCaseResponse();
-        response1.setTestName("Login Test");
-        response1.setStatus("PASSED");
+        when(seleniumServiceRequester.sendTestCase(any())).thenReturn(Mono.just(r1), Mono.just(r2));
 
-        SeleniumCaseResponse response2 = new SeleniumCaseResponse();
-        response2.setTestName("Logout Test");
-        response2.setStatus("PASSED");
+        List<SeleniumCaseResponse> result = seleniumService.sendTestCases(List.of(buildCase(1, "A"), buildCase(2, "B")));
 
-        when(seleniumServiceRequester.sendTestCase(any())).thenReturn(Mono.just(response1), Mono.just(response2));
-
-        List<SeleniumCaseResponse> results = seleniumService.sendTestCases(testCases);
-
-        assertNotNull(results);
-        assertEquals(2, results.size());
-    }
-
-    @Test
-    @DisplayName("Should handle empty test case list")
-    void testSendEmptyTestCaseList() {
-        List<SeleniumCaseResponse> results = seleniumService.sendTestCases(new ArrayList<>());
-
-        assertNotNull(results);
-        assertEquals(0, results.size());
-    }
-
-    @Test
-    @DisplayName("Should handle test case with failure")
-    void testSendTestCaseWithFailure() {
-        SeleniumCaseResponse response = new SeleniumCaseResponse();
-        response.setTestName("Login Test");
-        response.setStatus("FAILED");
-        response.setMessage("Assertion failed");
-
-        when(seleniumServiceRequester.sendTestCase(any())).thenReturn(Mono.just(response));
-
-        List<SeleniumCaseResponse> results = seleniumService.sendTestCases(testCases);
-
-        assertNotNull(results);
-        assertEquals("FAILED", results.get(0).getStatus());
-    }
-
-    @Test
-    @DisplayName("Should process test case with complex data")
-    void testSendTestCaseWithComplexData() {
-        SeleniumCaseDto complexCase = new SeleniumCaseDto();
-        complexCase.setTestName("Complex Navigation");
-        complexCase.setUrl("https://example.com/dashboard");
-        complexCase.setExpectedResult("User dashboard loaded");
-        testCases.add(complexCase);
-
-        SeleniumCaseResponse response = new SeleniumCaseResponse();
-        response.setTestName("Complex Navigation");
-        response.setStatus("PASSED");
-
-        when(seleniumServiceRequester.sendTestCase(any())).thenReturn(Mono.just(response));
-
-        List<SeleniumCaseResponse> results = seleniumService.sendTestCases(testCases);
-
-        assertNotNull(results);
-        assertTrue(results.size() > 0);
+        assertEquals(2, result.size());
+        assertEquals("r1", result.get(0).getOutput());
+        assertEquals("r2", result.get(1).getOutput());
+        verify(seleniumServiceRequester, times(2)).sendTestCase(any());
     }
 }

@@ -529,6 +529,7 @@ jobs:
         continue-on-error: true
 
       - name: Build Backend Docs Site
+        shell: bash
         run: |
           mkdir -p docs/backend
           mkdir -p docs/backend/javadoc
@@ -539,7 +540,7 @@ jobs:
 
           # Fallback: ensure the javadoc URL always resolves even if generation failed.
           if [ ! -f docs/backend/javadoc/index.html ]; then
-            cat > docs/backend/javadoc/index.html << 'EOF'
+            cat > docs/backend/javadoc/index.html <<'HTML_JAVADOC_FALLBACK'
             <!DOCTYPE html>
             <html>
             <head>
@@ -560,7 +561,7 @@ jobs:
               </div>
             </body>
             </html>
-            EOF
+HTML_JAVADOC_FALLBACK
           fi
 
           # Build a simple endpoint catalog from controller annotations.
@@ -578,7 +579,7 @@ jobs:
             echo "</ul>"
           } > docs/backend/endpoints.html
 
-          cat > docs/backend/index.html << 'EOF'
+          cat > docs/backend/index.html <<'HTML_BACKEND_INDEX'
           <!DOCTYPE html>
           <html>
           <head>
@@ -628,10 +629,10 @@ jobs:
             </div>
           </body>
           </html>
-          EOF
+HTML_BACKEND_INDEX
 
           # Backward compatibility for old links pointing to backend/README.md.
-          cat > docs/backend/README.md << 'EOF'
+          cat > docs/backend/README.md <<'MD_BACKEND_README'
           # Documentation Backend déplacée
 
           Cette page a été déplacée vers le nouveau site de documentation backend :
@@ -639,12 +640,13 @@ jobs:
           - [Ouvrir la documentation backend](./index.html)
           - [Ouvrir le catalogue des endpoints](./endpoints.html)
           - [Ouvrir JavaDoc](./javadoc/index.html)
-          EOF
+MD_BACKEND_README
 
       - name: Create Documentation Index
+        shell: bash
         run: |
           GENERATED_AT="$(date -u '+%Y-%m-%d %H:%M UTC')"
-          cat > docs/index.html << EOF
+          cat > docs/index.html <<HTML_MAIN_INDEX
           <!DOCTYPE html>
           <html>
           <head>
@@ -665,7 +667,7 @@ jobs:
             <p>Généré le : ${GENERATED_AT}</p>
           </body>
           </html>
-          EOF
+HTML_MAIN_INDEX
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

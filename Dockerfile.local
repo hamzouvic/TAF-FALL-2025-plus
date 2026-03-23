@@ -2,8 +2,11 @@ FROM maven:3.9.5-eclipse-temurin-17 AS builder
 
 WORKDIR /build
 
-# Copy simplified Docker-specific parent POM (backend only)
+# Copy Docker-specific parent POM under both names:
+# - pom.xml for default Maven commands
+# - pom.docker.xml for child modules using <relativePath>../pom.docker.xml</relativePath>
 COPY pom.docker.xml ./pom.xml
+COPY pom.docker.xml ./pom.docker.xml
 
 # Copy backend POM used by CI/local builds
 COPY backend/pom.xml ./backend/pom.xml
@@ -14,7 +17,7 @@ COPY performance/gatling/pom.xml ./performance/gatling/pom.xml
 COPY performance/jmeter/pom.xml ./performance/jmeter/pom.xml
 
 # Download dependencies (layer cached)
-RUN mvn dependency:go-offline -B || true
+RUN mvn -f pom.docker.xml dependency:go-offline -B || true
 
 # Copy source code
 COPY backend/src ./backend/src
@@ -22,7 +25,7 @@ COPY performance/gatling/src ./performance/gatling/src
 COPY performance/jmeter/src ./performance/jmeter/src
 
 # Build the application (including required modules) without compiling/running tests
-RUN mvn clean package -Dmaven.test.skip=true -B -pl backend -am
+RUN mvn -f pom.docker.xml clean package -Dmaven.test.skip=true -B -pl backend -am
 
 # Runtime stage with JMeter
 FROM eclipse-temurin:17-jre

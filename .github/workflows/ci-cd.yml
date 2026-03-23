@@ -386,6 +386,21 @@ jobs:
           mvn -f performance/pom.xml clean install -DskipTests -q
           mvn -f backend/pom.xml clean compile -DskipTests -q
 
+      - name: Regenerate backend coverage for Sonar
+        working-directory: ./backend
+        env:
+          API_TEST_TOKEN: test-secret-for-ci-only
+          API_TEST_EXP_TIME: 3600000
+          API_TEST_URL: http://localhost
+          API_TEST_PORT: 8080
+          SELENIUM_URL: http://localhost
+          SELENIUM_PORT: 4444
+          EUREKA_CLIENT_ENABLED: false
+        run: |
+          mvn test jacoco:report -q
+          test -f target/site/jacoco/jacoco.xml
+          echo "JaCoCo report generated: $(wc -c < target/site/jacoco/jacoco.xml) bytes"
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         env:

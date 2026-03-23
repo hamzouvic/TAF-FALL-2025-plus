@@ -1,7 +1,7 @@
-# Backend API Documentation Moved
+# Documentation Backend déplacée
 
-This page moved to the new backend docs site:
+Cette page a été déplacée vers le nouveau site de documentation backend :
 
-- [Open Backend Documentation](./index.html)
-- [Open Endpoint Catalog](./endpoints.html)
-- [Open JavaDoc](./javadoc/index.html)
+- [Ouvrir la documentation backend](./index.html)
+- [Ouvrir le catalogue des endpoints](./endpoints.html)
+- [Ouvrir JavaDoc](./javadoc/index.html)

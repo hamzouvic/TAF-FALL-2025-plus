@@ -15,20 +15,17 @@
 # Code pour `auth.service.spec.ts`
 
 ```ts
-import { TestBed } from '@angular/core/testing'
-import {
-  HttpClientTestingModule,
-  HttpTestingController,
-} from '@angular/common/http/testing'
-import { AuthService } from './user.service'
-import { environment } from '../../environments/environment'
+import { TestBed } from "@angular/core/testing";
+import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { AuthService } from "./user.service";
+import { environment } from "../../environments/environment";
 
 /**
  * Suite de tests pour le service AuthService.
  */
-describe('AuthService', () => {
-  let service: AuthService
-  let httpMock: HttpTestingController
+describe("AuthService", () => {
+  let service: AuthService;
+  let httpMock: HttpTestingController;
 
   /**
    * Configuration du module de test avant chaque test.
@@ -39,11 +36,11 @@ describe('AuthService', () => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [AuthService],
-    })
+    });
 
-    service = TestBed.inject(AuthService)
-    httpMock = TestBed.inject(HttpTestingController)
-  })
+    service = TestBed.inject(AuthService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
 
   /**
    * Nettoyage après chaque test.
@@ -51,51 +48,49 @@ describe('AuthService', () => {
    * Elle s'assure qu'il n'y a pas de requêtes HTTP en attente.
    */
   afterEach(() => {
-    httpMock.verify()
-  })
+    httpMock.verify();
+  });
 
   /**
    * Test pour vérifier que la méthode login envoie une requête POST à l'URL correcte avec les bonnes données.
    * Ce test simule un appel à la méthode login et vérifie que la requête HTTP est envoyée avec les bonnes données.
    */
   it("devrait envoyer une requête POST correcte lors de l'appel de login", () => {
-    const mockResponse = { token: 'fake-jwt-token' }
-    const username = 'testuser'
-    const password = 'testpassword'
+    const mockResponse = { token: "fake-jwt-token" };
+    const username = "testuser";
+    const password = "testpassword";
 
     service.login(username, password).subscribe((response) => {
-      expect(response).toEqual(mockResponse)
-    })
+      expect(response).toEqual(mockResponse);
+    });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/api/auth/signin`)
-    expect(req.request.method).toBe('POST')
-    expect(req.request.body).toEqual({ username, password })
-    req.flush(mockResponse)
-  })
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/auth/signin`);
+    expect(req.request.method).toBe("POST");
+    expect(req.request.body).toEqual({ username, password });
+    req.flush(mockResponse);
+  });
 
   /**
    * Test pour vérifier que la méthode register envoie une requête POST à l'URL correcte avec les bonnes données.
    * Ce test simule un appel à la méthode register et vérifie que la requête HTTP est envoyée avec les bonnes données.
    */
   it("devrait envoyer une requête POST correcte lors de l'appel de register", () => {
-    const mockResponse = { message: 'User registered successfully!' }
-    const fullName = 'John Doe'
-    const username = 'testuser'
-    const email = 'testuser@example.ca'
-    const password = 'testpassword'
+    const mockResponse = { message: "User registered successfully!" };
+    const fullName = "John Doe";
+    const username = "testuser";
+    const email = "testuser@example.ca";
+    const password = "testpassword";
 
-    service
-      .register(fullName, username, email, password)
-      .subscribe((response) => {
-        expect(response).toEqual(mockResponse)
-      })
+    service.register(fullName, username, email, password).subscribe((response) => {
+      expect(response).toEqual(mockResponse);
+    });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/api/auth/signup`)
-    expect(req.request.method).toBe('POST')
-    expect(req.request.body).toEqual({ fullName, username, email, password })
-    req.flush(mockResponse)
-  })
-})
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/auth/signup`);
+    expect(req.request.method).toBe("POST");
+    expect(req.request.body).toEqual({ fullName, username, email, password });
+    req.flush(mockResponse);
+  });
+});
 ```
 
 # Explications
@@ -138,23 +133,20 @@ describe('AuthService', () => {
 - Vérifier que la méthode `sendFtpJMeterRequest` retourne une Observable avec les données de réponse.
 
 ```ts
-import { TestBed } from '@angular/core/testing'
-import {
-  HttpClientTestingModule,
-  HttpTestingController,
-} from '@angular/common/http/testing'
-import { PerformanceTestApiService } from './performance-test-api.service'
-import { environment } from '../../environments/environment'
-import { GatlingRequest } from '../performance-test-api/gatling-api/gatling-request'
-import { JMeterHttpRequest } from '../performance-test-api/jmeter-api/jmeter-http-request'
-import { JMeterFTPRequest } from '../performance-test-api/jmeter-api/jmeter-ftp-request'
+import { TestBed } from "@angular/core/testing";
+import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { PerformanceTestApiService } from "./performance-test-api.service";
+import { environment } from "../../environments/environment";
+import { GatlingRequest } from "../performance-test-api/gatling-api/gatling-request";
+import { JMeterHttpRequest } from "../performance-test-api/jmeter-api/jmeter-http-request";
+import { JMeterFTPRequest } from "../performance-test-api/jmeter-api/jmeter-ftp-request";
 
 /**
  * Suite de tests pour le service PerformanceTestApiService.
  */
-describe('PerformanceTestApiService', () => {
-  let service: PerformanceTestApiService
-  let httpMock: HttpTestingController
+describe("PerformanceTestApiService", () => {
+  let service: PerformanceTestApiService;
+  let httpMock: HttpTestingController;
 
   /**
    * Configuration du module de test avant chaque test.
@@ -165,11 +157,11 @@ describe('PerformanceTestApiService', () => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [PerformanceTestApiService],
-    })
+    });
 
-    service = TestBed.inject(PerformanceTestApiService)
-    httpMock = TestBed.inject(HttpTestingController)
-  })
+    service = TestBed.inject(PerformanceTestApiService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
 
   /**
    * Nettoyage après chaque test.
@@ -177,100 +169,94 @@ describe('PerformanceTestApiService', () => {
    * Elle s'assure qu'il n'y a pas de requêtes HTTP en attente.
    */
   afterEach(() => {
-    httpMock.verify()
-  })
+    httpMock.verify();
+  });
 
   /**
    * Test pour vérifier que la méthode sendGatlingRequest envoie une requête POST à l'URL correcte avec les bonnes données.
    * Ce test simule un appel à la méthode sendGatlingRequest et vérifie que la requête HTTP est envoyée avec les bonnes données.
    */
   it("devrait envoyer une requête POST correcte lors de l'appel de sendGatlingRequest", () => {
-    const mockResponse = { success: true }
+    const mockResponse = { success: true };
     const request: GatlingRequest = {
-      testBaseUrl: '',
-      testScenarioName: '',
-      testRequestName: '',
-      testUri: '',
-      testRequestBody: '',
-      testMethodType: '',
+      testBaseUrl: "",
+      testScenarioName: "",
+      testRequestName: "",
+      testUri: "",
+      testRequestBody: "",
+      testMethodType: "",
       testUsersNumber: 0,
-    }
+    };
 
     service.sendGatlingRequest(request).subscribe((response) => {
-      expect(response).toEqual(mockResponse)
-    })
+      expect(response).toEqual(mockResponse);
+    });
 
-    const req = httpMock.expectOne(
-      `${environment.apiUrl}/api/performance/gatling/runSimulation`,
-    )
-    expect(req.request.method).toBe('POST')
-    expect(req.request.body).toEqual(request)
-    req.flush(mockResponse)
-  })
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/performance/gatling/runSimulation`);
+    expect(req.request.method).toBe("POST");
+    expect(req.request.body).toEqual(request);
+    req.flush(mockResponse);
+  });
 
   /**
    * Test pour vérifier que la méthode sendHttpJMeterRequest envoie une requête POST à l'URL correcte avec les bonnes données.
    * Ce test simule un appel à la méthode sendHttpJMeterRequest et vérifie que la requête HTTP est envoyée avec les bonnes données.
    */
   it("devrait envoyer une requête POST correcte lors de l'appel de sendHttpJMeterRequest", () => {
-    const mockResponse = { success: true }
+    const mockResponse = { success: true };
     const request: JMeterHttpRequest = {
-      nbThreads: '',
-      rampTime: '',
-      duration: '',
-      domain: '',
-      port: '',
-      protocol: '',
-      path: '',
-      method: '',
-      loop: '',
-      data: '',
-    }
+      nbThreads: "",
+      rampTime: "",
+      duration: "",
+      domain: "",
+      port: "",
+      protocol: "",
+      path: "",
+      method: "",
+      loop: "",
+      data: "",
+    };
 
     service.sendHttpJMeterRequest(request).subscribe((response) => {
-      expect(response).toEqual(mockResponse)
-    })
+      expect(response).toEqual(mockResponse);
+    });
 
-    const req = httpMock.expectOne(
-      `${environment.apiUrl}/api/performance/jmeter/http`,
-    )
-    expect(req.request.method).toBe('POST')
-    expect(req.request.body).toEqual(request)
-    req.flush(mockResponse)
-  })
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/performance/jmeter/http`);
+    expect(req.request.method).toBe("POST");
+    expect(req.request.body).toEqual(request);
+    req.flush(mockResponse);
+  });
 
   /**
    * Test pour vérifier que la méthode sendFtpJMeterRequest envoie une requête POST à l'URL correcte avec les bonnes données.
    * Ce test simule un appel à la méthode sendFtpJMeterRequest et vérifie que la requête HTTP est envoyée avec les bonnes données.
    */
   it("devrait envoyer une requête POST correcte lors de l'appel de sendFtpJMeterRequest", () => {
-    const mockResponse = { success: true }
+    const mockResponse = { success: true };
     const request: JMeterFTPRequest = {
-      nbThreads: '',
-      rampTime: '',
-      duration: '',
-      domain: '',
-      port: '',
-      method: '',
-      remotefile: '',
-      localfile: '',
-      username: '',
-      password: '',
-      loop: '',
-    }
+      nbThreads: "",
+      rampTime: "",
+      duration: "",
+      domain: "",
+      port: "",
+      method: "",
+      remotefile: "",
+      localfile: "",
+      username: "",
+      password: "",
+      loop: "",
+    };
 
     service.sendFtpJMeterRequest(request).subscribe((response) => {
-      expect(response).toEqual(mockResponse)
-    })
+      expect(response).toEqual(mockResponse);
+    });
 
-    const req = httpMock.expectOne(
-      `${environment.apiUrl}/api/performance/jmeter/ftp`,
-    )
-    expect(req.request.method).toBe('POST')
-    expect(req.request.body).toEqual(request)
-    req.flush(mockResponse)
-  })
-})
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/performance/jmeter/ftp`);
+    expect(req.request.method).toBe("POST");
+    expect(req.request.body).toEqual(request);
+    req.flush(mockResponse);
+  });
+});
 ```
 
 # Explications
@@ -331,22 +317,19 @@ describe('PerformanceTestApiService', () => {
 - Vérifier que le BehaviorSubject est mis à jour après la mise à jour des statuts des tests.
 
 ```ts
-import { TestBed } from '@angular/core/testing'
-import {
-  HttpClientTestingModule,
-  HttpTestingController,
-} from '@angular/common/http/testing'
-import { TestApiService } from './test-api.service'
-import { environment } from '../../environments/environment'
-import { testModel2 } from '../models/testmodel2'
-import { TestResponseModel } from '../models/testResponseModel'
+import { TestBed } from "@angular/core/testing";
+import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { TestApiService } from "./test-api.service";
+import { environment } from "../../environments/environment";
+import { testModel2 } from "../models/testmodel2";
+import { TestResponseModel } from "../models/testResponseModel";
 
 /**
  * Suite de tests pour le service TestApiService.
  */
-describe('TestApiService', () => {
-  let service: TestApiService
-  let httpMock: HttpTestingController
+describe("TestApiService", () => {
+  let service: TestApiService;
+  let httpMock: HttpTestingController;
 
   /**
    * Configuration du module de test avant chaque test.
@@ -357,11 +340,11 @@ describe('TestApiService', () => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [TestApiService],
-    })
+    });
 
-    service = TestBed.inject(TestApiService)
-    httpMock = TestBed.inject(HttpTestingController)
-  })
+    service = TestBed.inject(TestApiService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
 
   /**
    * Nettoyage après chaque test.
@@ -371,9 +354,9 @@ describe('TestApiService', () => {
   /**
    * Suite de tests pour le service TestApiService.
    */
-  describe('TestApiService', () => {
-    let service: TestApiService
-    let httpMock: HttpTestingController
+  describe("TestApiService", () => {
+    let service: TestApiService;
+    let httpMock: HttpTestingController;
 
     /**
      * Configuration du module de test avant chaque test.
@@ -384,11 +367,11 @@ describe('TestApiService', () => {
       TestBed.configureTestingModule({
         imports: [HttpClientTestingModule],
         providers: [TestApiService],
-      })
+      });
 
-      service = TestBed.inject(TestApiService)
-      httpMock = TestBed.inject(HttpTestingController)
-    })
+      service = TestBed.inject(TestApiService);
+      httpMock = TestBed.inject(HttpTestingController);
+    });
 
     /**
      * Nettoyage après chaque test.
@@ -396,8 +379,8 @@ describe('TestApiService', () => {
      * Elle s'assure qu'il n'y a pas de requêtes HTTP en attente.
      */
     afterEach(() => {
-      httpMock.verify()
-    })
+      httpMock.verify();
+    });
 
     /**
      * Test pour vérifier que la méthode executeTests envoie une requête POST pour chaque test dans dataTests.
@@ -409,30 +392,30 @@ describe('TestApiService', () => {
           answer: true,
           id: 0,
           stutsCode: 0,
-          output: '',
+          output: "",
           fieldAnswer: null,
           messages: [],
         },
-      ]
+      ];
       const dataTests: testModel2[] = [
         {
           id: 1,
-          method: 'GET',
-          apiUrl: '/api/test',
+          method: "GET",
+          apiUrl: "/api/test",
           headers: {},
           expectedHeaders: {},
         },
-      ]
+      ];
 
       service.executeTests(dataTests).subscribe((response) => {
-        expect(response).toEqual(mockResponse)
-      })
+        expect(response).toEqual(mockResponse);
+      });
 
-      const req = httpMock.expectOne(`${environment.apiUrl}/testapi/checkApi`)
-      expect(req.request.method).toBe('POST')
-      expect(req.request.body).toEqual(dataTests[0])
-      req.flush(mockResponse)
-    })
+      const req = httpMock.expectOne(`${environment.apiUrl}/testapi/checkApi`);
+      expect(req.request.method).toBe("POST");
+      expect(req.request.body).toEqual(dataTests[0]);
+      req.flush(mockResponse);
+    });
 
     /**
      * Test pour vérifier que la méthode addTestOnList ajoute un nouveau test à la liste.
@@ -441,21 +424,21 @@ describe('TestApiService', () => {
     it("devrait ajouter un nouveau test à la liste lors de l'appel de addTestOnList", () => {
       const newTest: testModel2 = {
         id: 0,
-        method: 'POST',
-        apiUrl: '/api/new',
+        method: "POST",
+        apiUrl: "/api/new",
         headers: {},
         expectedHeaders: {},
-      }
+      };
 
-      service.addTestOnList(newTest)
+      service.addTestOnList(newTest);
 
-      expect(service.listTests.length).toBe(1)
-      expect(service.listTests[0].method).toBe('POST')
+      expect(service.listTests.length).toBe(1);
+      expect(service.listTests[0].method).toBe("POST");
       service.tests$.subscribe((tests) => {
-        expect(tests.length).toBe(1)
-        expect(tests[0].method).toBe('POST')
-      })
-    })
+        expect(tests.length).toBe(1);
+        expect(tests[0].method).toBe("POST");
+      });
+    });
 
     /**
      * Test pour vérifier que la méthode deleteTest supprime le test correspondant à l'ID donné.
@@ -464,20 +447,20 @@ describe('TestApiService', () => {
     it("devrait supprimer le test correspondant à l'ID donné lors de l'appel de deleteTest", () => {
       const testToDelete: testModel2 = {
         id: 1,
-        method: 'DELETE',
-        apiUrl: '/api/delete',
+        method: "DELETE",
+        apiUrl: "/api/delete",
         headers: {},
         expectedHeaders: {},
-      }
-      service.addTestOnList(testToDelete)
+      };
+      service.addTestOnList(testToDelete);
 
-      service.deleteTest(1)
+      service.deleteTest(1);
 
-      expect(service.listTests.length).toBe(0)
+      expect(service.listTests.length).toBe(0);
       service.tests$.subscribe((tests) => {
-        expect(tests.length).toBe(0)
-      })
-    })
+        expect(tests.length).toBe(0);
+      });
+    });
 
     /**
      * Test pour vérifier que la méthode getTest retourne le test correspondant à l'ID donné.
@@ -486,17 +469,17 @@ describe('TestApiService', () => {
     it("devrait retourner le test correspondant à l'ID donné lors de l'appel de getTest", () => {
       const testToGet: testModel2 = {
         id: 1,
-        method: 'GET',
-        apiUrl: '/api/get',
+        method: "GET",
+        apiUrl: "/api/get",
         headers: {},
         expectedHeaders: {},
-      }
-      service.addTestOnList(testToGet)
+      };
+      service.addTestOnList(testToGet);
 
-      const result = service.getTest(1)
+      const result = service.getTest(1);
 
-      expect(result).toEqual(testToGet)
-    })
+      expect(result).toEqual(testToGet);
+    });
 
     /**
      * Test pour vérifier que la méthode updateTestsStatusExecution met à jour le statut des tests en fonction des réponses.
@@ -505,41 +488,41 @@ describe('TestApiService', () => {
     it("devrait mettre à jour le statut des tests en fonction des réponses lors de l'appel de updateTestsStatusExecution", () => {
       const testToUpdate: testModel2 = {
         id: 1,
-        method: 'PUT',
-        apiUrl: '/api/update',
+        method: "PUT",
+        apiUrl: "/api/update",
         headers: {},
         expectedHeaders: {},
         responseStatus: false,
-      }
-      service.addTestOnList(testToUpdate)
+      };
+      service.addTestOnList(testToUpdate);
 
       const responses: TestResponseModel[] = [
         {
           answer: true,
           id: 1,
           stutsCode: 200,
-          output: '',
+          output: "",
           fieldAnswer: null,
           messages: [],
         },
-      ]
-      service.updateTestsStatusExecution(responses)
+      ];
+      service.updateTestsStatusExecution(responses);
 
-      expect(service.listTests[0].responseStatus).toBe(true)
+      expect(service.listTests[0].responseStatus).toBe(true);
       service.tests$.subscribe((tests) => {
-        expect(tests[0].responseStatus).toBe(true)
-      })
-    })
+        expect(tests[0].responseStatus).toBe(true);
+      });
+    });
 
     /**
      * Test pour vérifier que la méthode getTest retourne undefined pour un ID inexistant.
      * Ce test simule un appel à la méthode getTest avec un ID qui n'existe pas et vérifie que la méthode retourne undefined.
      */
     it("devrait retourner undefined pour un ID inexistant lors de l'appel de getTest", () => {
-      const result = service.getTest(999)
+      const result = service.getTest(999);
 
-      expect(result).toBeUndefined()
-    })
+      expect(result).toBeUndefined();
+    });
 
     /**
      * Test pour vérifier que la méthode deleteTest ne fait rien pour un ID inexistant.
@@ -548,38 +531,38 @@ describe('TestApiService', () => {
     it("devrait ne rien faire pour un ID inexistant lors de l'appel de deleteTest", () => {
       const initialTest: testModel2 = {
         id: 1,
-        method: 'PATCH',
-        apiUrl: '/api/patch',
+        method: "PATCH",
+        apiUrl: "/api/patch",
         headers: {},
         expectedHeaders: {},
-      }
-      service.addTestOnList(initialTest)
+      };
+      service.addTestOnList(initialTest);
 
-      service.deleteTest(999)
+      service.deleteTest(999);
 
-      expect(service.listTests.length).toBe(1)
-      expect(service.listTests[0].id).toBe(1)
-    })
-  })
+      expect(service.listTests.length).toBe(1);
+      expect(service.listTests[0].id).toBe(1);
+    });
+  });
   it("devrait ajouter un nouveau test à la liste lors de l'appel de addTestOnList", () => {
     const newTest: testModel2 = {
       id: 0,
-      name: 'New Test',
-      method: '',
-      apiUrl: '',
+      name: "New Test",
+      method: "",
+      apiUrl: "",
       headers: {},
       expectedHeaders: {},
-    }
+    };
 
-    service.addTestOnList(newTest)
+    service.addTestOnList(newTest);
 
-    expect(service.listTests.length).toBe(1)
-    expect(service.listTests[0].name).toBe('New Test')
+    expect(service.listTests.length).toBe(1);
+    expect(service.listTests[0].name).toBe("New Test");
     service.tests$.subscribe((tests) => {
-      expect(tests.length).toBe(1)
-      expect(tests[0].name).toBe('New Test')
-    })
-  })
+      expect(tests.length).toBe(1);
+      expect(tests[0].name).toBe("New Test");
+    });
+  });
 
   /**
    * Test pour vérifier que la méthode deleteTest supprime le test correspondant à l'ID donné.
@@ -588,21 +571,21 @@ describe('TestApiService', () => {
   it("devrait supprimer le test correspondant à l'ID donné lors de l'appel de deleteTest", () => {
     const testToDelete: testModel2 = {
       id: 1,
-      name: 'Test to Delete',
-      method: '',
-      apiUrl: '',
+      name: "Test to Delete",
+      method: "",
+      apiUrl: "",
       headers: {},
       expectedHeaders: {},
-    }
-    service.addTestOnList(testToDelete)
+    };
+    service.addTestOnList(testToDelete);
 
-    service.deleteTest(1)
+    service.deleteTest(1);
 
-    expect(service.listTests.length).toBe(0)
+    expect(service.listTests.length).toBe(0);
     service.tests$.subscribe((tests) => {
-      expect(tests.length).toBe(0)
-    })
-  })
+      expect(tests.length).toBe(0);
+    });
+  });
 
   /**
    * Test pour vérifier que la méthode getTest retourne le test correspondant à l'ID donné.
@@ -611,18 +594,18 @@ describe('TestApiService', () => {
   it("devrait retourner le test correspondant à l'ID donné lors de l'appel de getTest", () => {
     const testToGet: testModel2 = {
       id: 1,
-      name: 'Test to Get',
-      method: '',
-      apiUrl: '',
+      name: "Test to Get",
+      method: "",
+      apiUrl: "",
       headers: {},
       expectedHeaders: {},
-    }
-    service.addTestOnList(testToGet)
+    };
+    service.addTestOnList(testToGet);
 
-    const result = service.getTest(1)
+    const result = service.getTest(1);
 
-    expect(result).toEqual(testToGet)
-  })
+    expect(result).toEqual(testToGet);
+  });
 
   /**
    * Test pour vérifier que la méthode updateTestsStatusExecution met à jour le statut des tests en fonction des réponses.
@@ -631,33 +614,33 @@ describe('TestApiService', () => {
   it("devrait mettre à jour le statut des tests en fonction des réponses lors de l'appel de updateTestsStatusExecution", () => {
     const testToUpdate: testModel2 = {
       id: 1,
-      name: 'Test to Update',
+      name: "Test to Update",
       responseStatus: false,
-      method: '',
-      apiUrl: '',
+      method: "",
+      apiUrl: "",
       headers: {},
       expectedHeaders: {},
-    }
-    service.addTestOnList(testToUpdate)
+    };
+    service.addTestOnList(testToUpdate);
 
     const responses: TestResponseModel[] = [
       {
         answer: true,
         id: 0,
         stutsCode: 0,
-        output: '',
+        output: "",
         fieldAnswer: null,
         messages: [],
       },
-    ]
-    service.updateTestsStatusExecution(responses)
+    ];
+    service.updateTestsStatusExecution(responses);
 
-    expect(service.listTests[0].responseStatus).toBe(true)
+    expect(service.listTests[0].responseStatus).toBe(true);
     service.tests$.subscribe((tests) => {
-      return expect(tests[0].responseStatus).toBe(true)
-    })
-  })
-})
+      return expect(tests[0].responseStatus).toBe(true);
+    });
+  });
+});
 ```
 
 # Explications
@@ -784,14 +767,14 @@ Le test `it('devrait mettre à jour le statut des tests en fonction des réponse
 # Code `token-storage.service.spec.ts`
 
 ```ts
-import { TestBed } from '@angular/core/testing'
-import { TokenStorageService } from './token-storage.service'
+import { TestBed } from "@angular/core/testing";
+import { TokenStorageService } from "./token-storage.service";
 
 /**
  * Suite de tests pour le service TokenStorageService.
  */
-describe('TokenStorageService', () => {
-  let service: TokenStorageService
+describe("TokenStorageService", () => {
+  let service: TokenStorageService;
 
   /**
    * Configuration du module de test avant chaque test.
@@ -799,9 +782,9 @@ describe('TokenStorageService', () => {
    * Elle configure le module de test avec les déclarations et les fournisseurs nécessaires.
    */
   beforeEach(() => {
-    TestBed.configureTestingModule({})
-    service = TestBed.inject(TokenStorageService)
-  })
+    TestBed.configureTestingModule({});
+    service = TestBed.inject(TokenStorageService);
+  });
 
   /**
    * Nettoyage après chaque test.
@@ -809,103 +792,99 @@ describe('TokenStorageService', () => {
    * Elle s'assure que le `sessionStorage` est vidé.
    */
   afterEach(() => {
-    window.sessionStorage.clear()
-  })
+    window.sessionStorage.clear();
+  });
 
   /**
    * Test pour vérifier que la méthode signOut vide le sessionStorage.
    * Ce test simule un appel à la méthode signOut et vérifie que le sessionStorage est vidé.
    */
   it("devrait vider le sessionStorage lors de l'appel de signOut", () => {
-    window.sessionStorage.setItem('test-key', 'test-value')
-    service.signOut()
-    expect(window.sessionStorage.getItem('test-key')).toBeNull()
-  })
+    window.sessionStorage.setItem("test-key", "test-value");
+    service.signOut();
+    expect(window.sessionStorage.getItem("test-key")).toBeNull();
+  });
 
   /**
    * Test pour vérifier que la méthode saveToken enregistre le token dans le sessionStorage.
    * Ce test simule un appel à la méthode saveToken et vérifie que le token est enregistré dans le sessionStorage.
    */
   it("devrait enregistrer le token dans le sessionStorage lors de l'appel de saveToken", () => {
-    const token = 'test-token'
-    service.saveToken(token)
-    expect(window.sessionStorage.getItem('user-token')).toBe(token)
-  })
+    const token = "test-token";
+    service.saveToken(token);
+    expect(window.sessionStorage.getItem("user-token")).toBe(token);
+  });
 
   /**
    * Test pour vérifier que la méthode saveToken remplace un token existant dans le sessionStorage.
    * Ce test simule un appel à la méthode saveToken avec un token existant et vérifie que le token est remplacé dans le sessionStorage.
    */
   it("devrait remplacer un token existant dans le sessionStorage lors de l'appel de saveToken", () => {
-    const oldToken = 'old-token'
-    const newToken = 'new-token'
-    service.saveToken(oldToken)
-    service.saveToken(newToken)
-    expect(window.sessionStorage.getItem('user-token')).toBe(newToken)
-  })
+    const oldToken = "old-token";
+    const newToken = "new-token";
+    service.saveToken(oldToken);
+    service.saveToken(newToken);
+    expect(window.sessionStorage.getItem("user-token")).toBe(newToken);
+  });
 
   /**
    * Test pour vérifier que la méthode getToken retourne le token enregistré dans le sessionStorage.
    * Ce test simule un appel à la méthode getToken et vérifie que le token enregistré est retourné.
    */
   it("devrait retourner le token enregistré dans le sessionStorage lors de l'appel de getToken", () => {
-    const token = 'test-token'
-    window.sessionStorage.setItem('user-token', token)
-    expect(service.getToken()).toBe(token)
-  })
+    const token = "test-token";
+    window.sessionStorage.setItem("user-token", token);
+    expect(service.getToken()).toBe(token);
+  });
 
   /**
    * Test pour vérifier que la méthode getToken retourne null si aucun token n'est enregistré.
    * Ce test simule un appel à la méthode getToken sans token enregistré et vérifie que null est retourné.
    */
   it("devrait retourner null si aucun token n'est enregistré lors de l'appel de getToken", () => {
-    expect(service.getToken()).toBeNull()
-  })
+    expect(service.getToken()).toBeNull();
+  });
 
   /**
    * Test pour vérifier que la méthode saveUser enregistre l'utilisateur dans le sessionStorage.
    * Ce test simule un appel à la méthode saveUser et vérifie que l'utilisateur est enregistré dans le sessionStorage.
    */
   it("devrait enregistrer l'utilisateur dans le sessionStorage lors de l'appel de saveUser", () => {
-    const user = { username: 'test-user' }
-    service.saveUser(user)
-    expect(window.sessionStorage.getItem('user-user')).toBe(
-      JSON.stringify(user),
-    )
-  })
+    const user = { username: "test-user" };
+    service.saveUser(user);
+    expect(window.sessionStorage.getItem("user-user")).toBe(JSON.stringify(user));
+  });
 
   /**
    * Test pour vérifier que la méthode saveUser remplace un utilisateur existant dans le sessionStorage.
    * Ce test simule un appel à la méthode saveUser avec un utilisateur existant et vérifie que l'utilisateur est remplacé dans le sessionStorage.
    */
   it("devrait remplacer un utilisateur existant dans le sessionStorage lors de l'appel de saveUser", () => {
-    const oldUser = { username: 'old-user' }
-    const newUser = { username: 'new-user' }
-    service.saveUser(oldUser)
-    service.saveUser(newUser)
-    expect(window.sessionStorage.getItem('user-user')).toBe(
-      JSON.stringify(newUser),
-    )
-  })
+    const oldUser = { username: "old-user" };
+    const newUser = { username: "new-user" };
+    service.saveUser(oldUser);
+    service.saveUser(newUser);
+    expect(window.sessionStorage.getItem("user-user")).toBe(JSON.stringify(newUser));
+  });
 
   /**
    * Test pour vérifier que la méthode getUser retourne l'utilisateur enregistré dans le sessionStorage.
    * Ce test simule un appel à la méthode getUser et vérifie que l'utilisateur enregistré est retourné.
    */
   it("devrait retourner l'utilisateur enregistré dans le sessionStorage lors de l'appel de getUser", () => {
-    const user = { username: 'test-user' }
-    window.sessionStorage.setItem('user-user', JSON.stringify(user))
-    expect(service.getUser()).toEqual(user)
-  })
+    const user = { username: "test-user" };
+    window.sessionStorage.setItem("user-user", JSON.stringify(user));
+    expect(service.getUser()).toEqual(user);
+  });
 
   /**
    * Test pour vérifier que la méthode getUser retourne un objet vide si aucun utilisateur n'est enregistré.
    * Ce test simule un appel à la méthode getUser sans utilisateur enregistré et vérifie qu'un objet vide est retourné.
    */
   it("devrait retourner un objet vide si aucun utilisateur n'est enregistré lors de l'appel de getUser", () => {
-    expect(service.getUser()).toEqual({})
-  })
-})
+    expect(service.getUser()).toEqual({});
+  });
+});
 ```
 
 # Explications
@@ -956,79 +935,76 @@ describe('TokenStorageService', () => {
 # Code pour `user.service.spec.ts`
 
 ```ts
-import { TestBed } from '@angular/core/testing'
-import {
-  HttpClientTestingModule,
-  HttpTestingController,
-} from '@angular/common/http/testing'
-import { UserService } from './user.service'
-import { environment } from '../../environments/environment'
+import { TestBed } from "@angular/core/testing";
+import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { UserService } from "./user.service";
+import { environment } from "../../environments/environment";
 
-describe('UserService', () => {
-  let service: UserService
-  let httpMock: HttpTestingController
+describe("UserService", () => {
+  let service: UserService;
+  let httpMock: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [UserService],
-    })
-    service = TestBed.inject(UserService)
-    httpMock = TestBed.inject(HttpTestingController)
-  })
+    });
+    service = TestBed.inject(UserService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
 
   afterEach(() => {
-    httpMock.verify()
-  })
+    httpMock.verify();
+  });
 
   /**
    * Test pour vérifier que la méthode getPublicContent envoie une requête GET à l'URL correcte.
    * Ce test simule un appel à la méthode getPublicContent et vérifie que la requête HTTP est envoyée avec les bonnes données.
    */
-  it('devrait envoyer une requête GET correcte pour getPublicContent', () => {
-    const mockResponse = 'Contenu public'
+  it("devrait envoyer une requête GET correcte pour getPublicContent", () => {
+    const mockResponse = "Contenu public";
 
     service.getPublicContent().subscribe((response) => {
-      expect(response).toEqual(mockResponse)
-    })
+      expect(response).toEqual(mockResponse);
+    });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/api/test/all`)
-    expect(req.request.method).toBe('GET')
-    req.flush(mockResponse)
-  })
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/test/all`);
+    expect(req.request.method).toBe("GET");
+    req.flush(mockResponse);
+  });
 
   /**
    * Test pour vérifier que la méthode getUserBoard envoie une requête GET à l'URL correcte.
    * Ce test simule un appel à la méthode getUserBoard et vérifie que la requête HTTP est envoyée avec les bonnes données.
    */
-  it('devrait envoyer une requête GET correcte pour getUserBoard', () => {
-    const mockResponse = 'Contenu utilisateur'
+  it("devrait envoyer une requête GET correcte pour getUserBoard", () => {
+    const mockResponse = "Contenu utilisateur";
 
     service.getUserBoard().subscribe((response) => {
-      expect(response).toEqual(mockResponse)
-    })
+      expect(response).toEqual(mockResponse);
+    });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/api/test/user`)
-    expect(req.request.method).toBe('GET')
-    req.flush(mockResponse)
-  })
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/test/user`);
+    expect(req.request.method).toBe("GET");
+    req.flush(mockResponse);
+  });
 
   /**
    * Test pour vérifier que la méthode getAdminBoard envoie une requête GET à l'URL correcte.
    * Ce test simule un appel à la méthode getAdminBoard et vérifie que la requête HTTP est envoyée avec les bonnes données.
    */
-  it('devrait envoyer une requête GET correcte pour getAdminBoard', () => {
-    const mockResponse = 'Contenu administrateur'
+  it("devrait envoyer une requête GET correcte pour getAdminBoard", () => {
+    const mockResponse = "Contenu administrateur";
 
     service.getAdminBoard().subscribe((response) => {
-      expect(response).toEqual(mockResponse)
-    })
+      expect(response).toEqual(mockResponse);
+    });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/api/test/admin`)
-    expect(req.request.method).toBe('GET')
-    req.flush(mockResponse)
-  })
-})
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/test/admin`);
+    expect(req.request.method).toBe("GET");
+    req.flush(mockResponse);
+  });
+});
 ```
 
 # Explications

@@ -1,5 +1,5 @@
-import { JMeterHttpRequest } from '../performance-test-api/jmeter-api/jmeter-http-request'
-import { JMeterFTPRequest } from '../performance-test-api/jmeter-api/jmeter-ftp-request'
+import { JMeterHttpRequest } from '../performance-test-api/jmeter-api/jmeter-http-request';
+import { JMeterFTPRequest } from '../performance-test-api/jmeter-api/jmeter-ftp-request';
 
 export const JMETER_SCENARIOS = [
   {
@@ -68,4 +68,4 @@ export const JMETER_SCENARIOS = [
       '1',
     ),
   },
-]
+];

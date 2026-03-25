@@ -27,19 +27,19 @@
 # Code `jmeter-api.component.spec.ts`
 
 ```ts
-import { ComponentFixture, TestBed } from '@angular/core/testing'
-import { JmeterApiComponent } from './jmeter-api.component'
-import { PerformanceTestApiService } from 'src/app/_services/performance-test-api.service'
-import { of, throwError } from 'rxjs'
-import Swal from 'sweetalert2'
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { JmeterApiComponent } from "./jmeter-api.component";
+import { PerformanceTestApiService } from "src/app/_services/performance-test-api.service";
+import { of, throwError } from "rxjs";
+import Swal from "sweetalert2";
 
 /**
  * Suite de tests pour le composant JmeterApiComponent.
  */
-describe('JmeterApiComponent', () => {
-  let component: JmeterApiComponent
-  let fixture: ComponentFixture<JmeterApiComponent>
-  let performanceTestApiService: jasmine.SpyObj<PerformanceTestApiService>
+describe("JmeterApiComponent", () => {
+  let component: JmeterApiComponent;
+  let fixture: ComponentFixture<JmeterApiComponent>;
+  let performanceTestApiService: jasmine.SpyObj<PerformanceTestApiService>;
 
   /**
    * Configuration du module de test avant chaque test.
@@ -47,20 +47,15 @@ describe('JmeterApiComponent', () => {
    * Elle configure le module de test avec les déclarations et les fournisseurs nécessaires.
    */
   beforeEach(async () => {
-    const spy = jasmine.createSpyObj('PerformanceTestApiService', [
-      'sendHttpJMeterRequest',
-      'sendFtpJMeterRequest',
-    ])
+    const spy = jasmine.createSpyObj("PerformanceTestApiService", ["sendHttpJMeterRequest", "sendFtpJMeterRequest"]);
 
     await TestBed.configureTestingModule({
       declarations: [JmeterApiComponent],
       providers: [{ provide: PerformanceTestApiService, useValue: spy }],
-    }).compileComponents()
+    }).compileComponents();
 
-    performanceTestApiService = TestBed.inject(
-      PerformanceTestApiService,
-    ) as jasmine.SpyObj<PerformanceTestApiService>
-  })
+    performanceTestApiService = TestBed.inject(PerformanceTestApiService) as jasmine.SpyObj<PerformanceTestApiService>;
+  });
 
   /**
    * Initialisation du composant et du fixture avant chaque test.
@@ -68,132 +63,124 @@ describe('JmeterApiComponent', () => {
    * Elle crée une instance du composant et déclenche la détection des changements.
    */
   beforeEach(() => {
-    fixture = TestBed.createComponent(JmeterApiComponent)
-    component = fixture.componentInstance
-    fixture.detectChanges()
-  })
+    fixture = TestBed.createComponent(JmeterApiComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
 
   /**
    * Test pour vérifier que le composant est créé correctement.
    * Ce test vérifie que l'instance du composant est créée et qu'elle est définie.
    */
-  it('devrait créer le composant', () => {
-    expect(component).toBeTruthy()
-  })
+  it("devrait créer le composant", () => {
+    expect(component).toBeTruthy();
+  });
 
   /**
    * Test pour vérifier que la méthode onHttpSubmit appelle sendHttpJMeterRequest.
    * Ce test simule un appel à la méthode onHttpSubmit et vérifie que la méthode sendHttpJMeterRequest du service est appelée.
    */
   it("devrait appeler sendHttpJMeterRequest lors de l'appel de onHttpSubmit", () => {
-    const mockResponse = [{ success: true }]
-    performanceTestApiService.sendHttpJMeterRequest.and.returnValue(
-      of(mockResponse),
-    )
+    const mockResponse = [{ success: true }];
+    performanceTestApiService.sendHttpJMeterRequest.and.returnValue(of(mockResponse));
 
-    component.onHttpSubmit()
+    component.onHttpSubmit();
 
-    expect(performanceTestApiService.sendHttpJMeterRequest).toHaveBeenCalled()
-    expect(component.modal!.style.display).toBe('block')
-  })
+    expect(performanceTestApiService.sendHttpJMeterRequest).toHaveBeenCalled();
+    expect(component.modal!.style.display).toBe("block");
+  });
 
   /**
    * Test pour vérifier que SweetAlert s'affiche en cas d'erreur ou si la réponse est vide dans onHttpSubmit.
    */
   it("devrait afficher SweetAlert en cas d'erreur ou si la réponse est vide dans onHttpSubmit", () => {
-    performanceTestApiService.sendHttpJMeterRequest.and.returnValue(of([]))
+    performanceTestApiService.sendHttpJMeterRequest.and.returnValue(of([]));
 
-    component.onHttpSubmit()
+    component.onHttpSubmit();
 
-    expect(Swal.isVisible()).toBeTruthy()
+    expect(Swal.isVisible()).toBeTruthy();
 
-    performanceTestApiService.sendHttpJMeterRequest.and.returnValue(
-      throwError('error'),
-    )
+    performanceTestApiService.sendHttpJMeterRequest.and.returnValue(throwError("error"));
 
-    component.onHttpSubmit()
+    component.onHttpSubmit();
 
-    expect(Swal.isVisible()).toBeTruthy()
-  })
+    expect(Swal.isVisible()).toBeTruthy();
+  });
 
   /**
    * Test pour vérifier que la méthode onFtpSubmit appelle sendFtpJMeterRequest.
    * Ce test simule un appel à la méthode onFtpSubmit et vérifie que la méthode sendFtpJMeterRequest du service est appelée.
    */
   it("devrait appeler sendFtpJMeterRequest lors de l'appel de onFtpSubmit", () => {
-    const mockResponse = [{ success: true }]
-    performanceTestApiService.sendFtpJMeterRequest.and.returnValue(
-      of(mockResponse),
-    )
+    const mockResponse = [{ success: true }];
+    performanceTestApiService.sendFtpJMeterRequest.and.returnValue(of(mockResponse));
 
-    component.onFtpSubmit()
+    component.onFtpSubmit();
 
-    expect(performanceTestApiService.sendFtpJMeterRequest).toHaveBeenCalled()
-    expect(component.modal!.style.display).toBe('block')
-  })
+    expect(performanceTestApiService.sendFtpJMeterRequest).toHaveBeenCalled();
+    expect(component.modal!.style.display).toBe("block");
+  });
 
   /**
    * Test pour vérifier que SweetAlert s'affiche en cas d'erreur ou si la réponse est vide dans onFtpSubmit.
    */
   it("devrait afficher SweetAlert en cas d'erreur ou si la réponse est vide dans onFtpSubmit", () => {
-    performanceTestApiService.sendFtpJMeterRequest.and.returnValue(of([]))
+    performanceTestApiService.sendFtpJMeterRequest.and.returnValue(of([]));
 
-    component.onFtpSubmit()
+    component.onFtpSubmit();
 
-    expect(Swal.isVisible()).toBeTruthy()
+    expect(Swal.isVisible()).toBeTruthy();
 
-    performanceTestApiService.sendFtpJMeterRequest.and.returnValue(
-      throwError('error'),
-    )
+    performanceTestApiService.sendFtpJMeterRequest.and.returnValue(throwError("error"));
 
-    component.onFtpSubmit()
+    component.onFtpSubmit();
 
-    expect(Swal.isVisible()).toBeTruthy()
-  })
+    expect(Swal.isVisible()).toBeTruthy();
+  });
 
   /**
    * Test pour vérifier que la méthode closeModal ferme la modal.
    * Ce test simule un appel à la méthode closeModal et vérifie que le style d'affichage de la modal est défini à "none".
    */
   it("devrait fermer la modal lors de l'appel de closeModal", () => {
-    component.modal = { style: { display: 'block' } } as HTMLElement
+    component.modal = { style: { display: "block" } } as HTMLElement;
 
-    component.closeModal()
+    component.closeModal();
 
-    expect(component.modal.style.display).toBe('none')
-  })
+    expect(component.modal.style.display).toBe("none");
+  });
 
   /**
    * Test pour vérifier que la méthode toggleForms affiche/masque correctement les formulaires HTTP et FTP.
    * Ce test simule un appel à la méthode toggleForms et vérifie que les formulaires sont affichés/masqués correctement en fonction de l'état du switch.
    */
   it("devrait afficher/masquer correctement les formulaires HTTP et FTP lors de l'appel de toggleForms", () => {
-    component.switchCheckbox = { checked: true } as HTMLInputElement
-    component.httpForm = { style: { display: 'block' } } as HTMLElement
-    component.ftpForm = { style: { display: 'none' } } as HTMLElement
-    component.switchLabel = { innerText: 'HTTP' } as HTMLElement
-    component.ftp_description = { style: { display: 'none' } } as HTMLElement
-    component.http_description = { style: { display: 'block' } } as HTMLElement
+    component.switchCheckbox = { checked: true } as HTMLInputElement;
+    component.httpForm = { style: { display: "block" } } as HTMLElement;
+    component.ftpForm = { style: { display: "none" } } as HTMLElement;
+    component.switchLabel = { innerText: "HTTP" } as HTMLElement;
+    component.ftp_description = { style: { display: "none" } } as HTMLElement;
+    component.http_description = { style: { display: "block" } } as HTMLElement;
 
-    component.toggleForms()
+    component.toggleForms();
 
-    expect(component.httpForm.style.display).toBe('none')
-    expect(component.ftpForm.style.display).toBe('block')
-    expect(component.ftp_description.style.display).toBe('block')
-    expect(component.http_description.style.display).toBe('none')
-    expect(component.switchLabel.innerText).toBe('FTP')
+    expect(component.httpForm.style.display).toBe("none");
+    expect(component.ftpForm.style.display).toBe("block");
+    expect(component.ftp_description.style.display).toBe("block");
+    expect(component.http_description.style.display).toBe("none");
+    expect(component.switchLabel.innerText).toBe("FTP");
 
-    component.switchCheckbox.checked = false
+    component.switchCheckbox.checked = false;
 
-    component.toggleForms()
+    component.toggleForms();
 
-    expect(component.httpForm.style.display).toBe('block')
-    expect(component.ftpForm.style.display).toBe('none')
-    expect(component.ftp_description.style.display).toBe('none')
-    expect(component.http_description.style.display).toBe('block')
-    expect(component.switchLabel.innerText).toBe('HTTP')
-  })
-})
+    expect(component.httpForm.style.display).toBe("block");
+    expect(component.ftpForm.style.display).toBe("none");
+    expect(component.ftp_description.style.display).toBe("none");
+    expect(component.http_description.style.display).toBe("block");
+    expect(component.switchLabel.innerText).toBe("HTTP");
+  });
+});
 ```
 
 # Explications

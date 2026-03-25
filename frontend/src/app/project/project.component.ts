@@ -1,5 +1,5 @@
-import { Component } from '@angular/core'
-import { Router } from '@angular/router'
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-project',
@@ -12,26 +12,26 @@ export class ProjectComponent {
     responsable: null,
     startDate: null,
     endDate: null,
-  }
+  };
 
-  loading = false
-  submitted = false
+  loading = false;
+  submitted = false;
 
   constructor(private router: Router) {}
 
   // convenience getter for easy access to form fields
   get f() {
-    return this.creationForm.controls
+    return this.creationForm.controls;
   }
 
   onSubmit() {
-    this.submitted = true
+    this.submitted = true;
 
     // stop here if form is invalid
     if (this.creationForm.invalid) {
-      return
+      return;
     }
 
-    this.loading = true
+    this.loading = true;
   }
 }

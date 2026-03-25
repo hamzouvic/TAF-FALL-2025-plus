@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core'
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-busy-spinner',
@@ -6,7 +6,7 @@ import { Component, Input } from '@angular/core'
   styleUrls: ['./busy-spinner.component.less'],
 })
 export class BusySpinnerComponent {
-  @Input() message: string = 'Veuillez patienter'
+  @Input() message: string = 'Veuillez patienter';
 
   constructor() {}
 }

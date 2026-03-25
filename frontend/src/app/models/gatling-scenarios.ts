@@ -1,7 +1,7 @@
 import {
   GatlingRequest,
   ResponseTimePerPercentile,
-} from '../performance-test-api/gatling-api/gatling-request'
+} from '../performance-test-api/gatling-api/gatling-request';
 
 export const GATLING_SCENARIOS = [
   {
@@ -80,4 +80,4 @@ export const GATLING_SCENARIOS = [
       ],
     }),
   },
-]
+];

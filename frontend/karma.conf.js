@@ -3,17 +3,17 @@
 
 module.exports = function (config) {
   // Check if the CI environment variable is set (GitHub Actions and most CI tools set this automatically)
-  const isCI = process.env.CI
+  const isCI = process.env.CI;
 
   config.set({
-    basePath: '',
-    frameworks: ['jasmine', '@angular-devkit/build-angular'],
+    basePath: "",
+    frameworks: ["jasmine", "@angular-devkit/build-angular"],
     plugins: [
-      require('karma-jasmine'),
-      require('karma-chrome-launcher'),
-      require('karma-jasmine-html-reporter'),
-      require('karma-coverage'),
-      require('@angular-devkit/build-angular/plugins/karma'),
+      require("karma-jasmine"),
+      require("karma-chrome-launcher"),
+      require("karma-jasmine-html-reporter"),
+      require("karma-coverage"),
+      require("@angular-devkit/build-angular/plugins/karma"),
     ],
     client: {
       jasmine: {
@@ -28,12 +28,12 @@ module.exports = function (config) {
       suppressAll: true, // removes the duplicated traces
     },
     coverageReporter: {
-      dir: require('path').join(__dirname, './coverage/taf-ui'),
-      subdir: '.',
+      dir: require("path").join(__dirname, "./coverage/taf-ui"),
+      subdir: ".",
       reporters: [
-        { type: 'html' },
-        { type: 'text-summary' },
-        { type: 'lcovonly' },
+        { type: "html" },
+        { type: "text-summary" },
+        { type: "lcovonly" },
       ],
       check: {
         global: {
@@ -44,13 +44,13 @@ module.exports = function (config) {
         },
       },
     },
-    reporters: ['progress', 'kjhtml'],
+    reporters: ["progress", "kjhtml"],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-    browsers: [isCI ? 'ChromeHeadless' : 'Chrome'],
+    browsers: [isCI ? "ChromeHeadless" : "Chrome"],
     singleRun: isCI, // On CI, ensure the runner exits in CI after tests complete
     restartOnFileChange: true,
-  })
-}
+  });
+};

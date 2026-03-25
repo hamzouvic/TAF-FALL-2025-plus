@@ -30,83 +30,77 @@ Vérifie que la méthode `closeModal` ferme la modal en définissant son style d
 # Code `gatling-api.component.spec.ts`
 
 ```ts
-import { ComponentFixture, TestBed } from '@angular/core/testing'
-import { GatlingApiComponent } from './gatling-api.component'
-import { PerformanceTestApiService } from '../../_services/performance-test-api.service'
-import { of } from 'rxjs'
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { GatlingApiComponent } from "./gatling-api.component";
+import { PerformanceTestApiService } from "../../_services/performance-test-api.service";
+import { of } from "rxjs";
 
 /**
  * Suite de tests pour le composant GatlingApiComponent.
  */
-describe('GatlingApiComponent', () => {
-  let component: GatlingApiComponent
-  let fixture: ComponentFixture<GatlingApiComponent>
-  let performanceTestApiService: jasmine.SpyObj<PerformanceTestApiService>
+describe("GatlingApiComponent", () => {
+  let component: GatlingApiComponent;
+  let fixture: ComponentFixture<GatlingApiComponent>;
+  let performanceTestApiService: jasmine.SpyObj<PerformanceTestApiService>;
 
   /**
    * Configuration du module de test avant chaque test.
    */
   beforeEach(async () => {
-    const spy = jasmine.createSpyObj('PerformanceTestApiService', [
-      'sendGatlingRequest',
-    ])
+    const spy = jasmine.createSpyObj("PerformanceTestApiService", ["sendGatlingRequest"]);
 
     await TestBed.configureTestingModule({
       declarations: [GatlingApiComponent],
       providers: [{ provide: PerformanceTestApiService, useValue: spy }],
-    }).compileComponents()
+    }).compileComponents();
 
-    performanceTestApiService = TestBed.inject(
-      PerformanceTestApiService,
-    ) as jasmine.SpyObj<PerformanceTestApiService>
-  })
+    performanceTestApiService = TestBed.inject(PerformanceTestApiService) as jasmine.SpyObj<PerformanceTestApiService>;
+  });
 
   /**
    * Initialisation du composant et du fixture avant chaque test.
    */
   beforeEach(() => {
-    fixture = TestBed.createComponent(GatlingApiComponent)
-    component = fixture.componentInstance
-    fixture.detectChanges()
-  })
+    fixture = TestBed.createComponent(GatlingApiComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
 
   /**
    * Test pour vérifier que le composant est créé correctement.
    */
-  it('devrait créer le composant', () => {
-    expect(component).toBeTruthy()
-  })
+  it("devrait créer le composant", () => {
+    expect(component).toBeTruthy();
+  });
 
   /**
    * Test pour vérifier que la méthode onSubmit appelle sendGatlingRequest.
    */
   it("devrait appeler sendGatlingRequest lors de l'appel de onSubmit", () => {
-    const mockResponse = { success: true }
-    performanceTestApiService.sendGatlingRequest.and.returnValue(
-      of(mockResponse),
-    )
+    const mockResponse = { success: true };
+    performanceTestApiService.sendGatlingRequest.and.returnValue(of(mockResponse));
 
-    component.onSubmit()
+    component.onSubmit();
 
-    expect(performanceTestApiService.sendGatlingRequest).toHaveBeenCalled()
-  })
+    expect(performanceTestApiService.sendGatlingRequest).toHaveBeenCalled();
+  });
 
   /**
    * Test pour vérifier que la méthode closeModal ferme la modal.
    */
   it("devrait fermer la modal lors de l'appel de closeModal", () => {
-    const modalElement = { style: { display: 'block' } }
-    component.modal = modalElement as any
+    const modalElement = { style: { display: "block" } };
+    component.modal = modalElement as any;
 
-    component.closeModal()
+    component.closeModal();
 
     if (component.modal) {
-      expect(component.modal.style.display).toBe('none')
+      expect(component.modal.style.display).toBe("none");
     } else {
-      fail('Modal is null')
+      fail("Modal is null");
     }
-  })
-})
+  });
+});
 ```
 
 # Explications du code

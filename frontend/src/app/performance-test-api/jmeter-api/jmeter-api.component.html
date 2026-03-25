@@ -98,7 +98,7 @@
         <p><strong>Elapsed:</strong> {{ selectedTest.elapsed }}</p>
         <p>
           <strong>Status:</strong>
-          {{ selectedTest.success === 'true' ? 'Success' : 'Failed' }}
+          {{ selectedTest.success === "true" ? "Success" : "Failed" }}
         </p>
         <p><strong>Bytes:</strong> {{ selectedTest.bytes }}</p>
         <p>
@@ -124,7 +124,7 @@
     class="sidebar http-sidebar"
     [ngClass]="{
       'sidebar-visible': isHttpSidebarVisible,
-      'sidebar-hidden': !isHttpSidebarVisible,
+      'sidebar-hidden': !isHttpSidebarVisible
     }"
   >
     <!-- HTTP Sidebar -->
@@ -171,7 +171,7 @@
     class="sidebar ftp-sidebar"
     [ngClass]="{
       'sidebar-visible': isFtpSidebarVisible,
-      'sidebar-hidden': !isFtpSidebarVisible,
+      'sidebar-hidden': !isFtpSidebarVisible
     }"
   >
     <!-- FTP Sidebar -->
@@ -216,7 +216,7 @@
   <div
     class="main"
     [ngClass]="{
-      'sidebar-visible': isHttpSidebarVisible || isFtpSidebarVisible,
+      'sidebar-visible': isHttpSidebarVisible || isFtpSidebarVisible
     }"
   >
     <div class="content">
@@ -255,7 +255,7 @@
             (click)="generateFromPrompt()"
             [disabled]="aiGenerating"
           >
-            {{ aiGenerating ? 'Génération...' : 'Générer' }}
+            {{ aiGenerating ? "Génération..." : "Générer" }}
           </button>
         </div>
       </div>
@@ -384,9 +384,9 @@
                   <label
                     ><strong
                       >{{
-                        selectedProtocol === 'FTP'
-                          ? 'Méthode FTP'
-                          : 'Méthode HTTP'
+                        selectedProtocol === "FTP"
+                          ? "Méthode FTP"
+                          : "Méthode HTTP"
                       }}
                       <span class="required-star">*</span></strong
                     ></label
@@ -486,8 +486,8 @@
                 ></i>
                 {{
                   isGlossaryVisible
-                    ? 'Masquer les profils'
-                    : 'Appliquer un profil de charge'
+                    ? "Masquer les profils"
+                    : "Appliquer un profil de charge"
                 }}
               </button>
 
@@ -610,11 +610,11 @@
                 <p><strong>Protocole:</strong> {{ selectedProtocol }}</p>
                 <p>
                   <strong>URL:</strong>
-                  {{ detailsFormGroup.get('domain')?.value }}
+                  {{ detailsFormGroup.get("domain")?.value }}
                 </p>
                 <p *ngIf="detailsFormGroup.get('port')?.value">
                   <strong>Port:</strong>
-                  {{ detailsFormGroup.get('port')?.value }}
+                  {{ detailsFormGroup.get("port")?.value }}
                 </p>
               </div>
               <hr />
@@ -622,11 +622,11 @@
                 <h4>Requête</h4>
                 <p>
                   <strong>Méthode:</strong>
-                  {{ paramsFormGroup.get('method')?.value }}
+                  {{ paramsFormGroup.get("method")?.value }}
                 </p>
                 <p *ngIf="selectedProtocol !== 'FTP'">
                   <strong>Chemin:</strong>
-                  {{ paramsFormGroup.get('path')?.value }}
+                  {{ paramsFormGroup.get("path")?.value }}
                 </p>
                 <p *ngIf="selectedProtocol === 'FTP'">
                   <strong>Remote File:</strong> {{ ftp_request.remotefile }}
@@ -639,21 +639,21 @@
                   <div class="col-md-6">
                     <p>
                       <strong>Nombre d'utilisateurs:</strong>
-                      {{ configFormGroup.get('nbThreads')?.value }}
+                      {{ configFormGroup.get("nbThreads")?.value }}
                     </p>
                     <p>
                       <strong>Temps de montée:</strong>
-                      {{ configFormGroup.get('rampTime')?.value }}s
+                      {{ configFormGroup.get("rampTime")?.value }}s
                     </p>
                   </div>
                   <div class="col-md-6">
                     <p>
                       <strong>Durée:</strong>
-                      {{ configFormGroup.get('duration')?.value }}s
+                      {{ configFormGroup.get("duration")?.value }}s
                     </p>
                     <p>
                       <strong>Boucles:</strong>
-                      {{ configFormGroup.get('loop')?.value }}
+                      {{ configFormGroup.get("loop")?.value }}
                     </p>
                   </div>
                 </div>

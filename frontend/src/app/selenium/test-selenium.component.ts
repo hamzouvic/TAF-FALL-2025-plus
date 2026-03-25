@@ -1,5 +1,5 @@
-import { Component, Renderer2, ElementRef } from '@angular/core'
-import { HttpClient } from '@angular/common/http'
+import { Component, Renderer2, ElementRef } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-test-selenium',
@@ -12,80 +12,80 @@ export class TestSeleniumComponent {
     private renderer: Renderer2,
     private el: ElementRef,
   ) {}
-  testResult: any
-  counterAction: number = 1
-  counterCase: number = 0
+  testResult: any;
+  counterAction: number = 1;
+  counterCase: number = 0;
   cases: {
-    case_id: number
-    caseName: string
+    case_id: number;
+    caseName: string;
     actions: {
-      action_id: number
-      action_type_id: number
-      action_type_name: string
-      object: string
-      input: string
-      target: string
-    }[]
-  }[] = []
-  percentage = 0
+      action_id: number;
+      action_type_id: number;
+      action_type_name: string;
+      object: string;
+      input: string;
+      target: string;
+    }[];
+  }[] = [];
+  percentage = 0;
 
   runMethod(cases: any) {
-    let counterTrue = 0
-    const API_URL = 'http://localhost:8080/api/testselenium'
-    this.showResultModal()
-    this.showSpinner()
+    let counterTrue = 0;
+    const API_URL = 'http://localhost:8080/api/testselenium';
+    this.showResultModal();
+    this.showSpinner();
     this.http.post(API_URL, cases).subscribe(
       (response) => {
-        console.log('tested successfully:', response)
-        this.testResult = response
+        console.log('tested successfully:', response);
+        this.testResult = response;
         // for calculate the percentage of the success cases
         for (let result of this.testResult) {
           if (result.success) {
-            counterTrue++
+            counterTrue++;
           }
         }
-        this.percentage = (counterTrue / this.testResult.length) * 100
-        this.hideSpinner()
+        this.percentage = (counterTrue / this.testResult.length) * 100;
+        this.hideSpinner();
       },
       (error) => {
-        console.error('Error test:', error)
+        console.error('Error test:', error);
       },
-    )
+    );
   }
   showResultModal(): void {
-    const resultModal = this.el.nativeElement.querySelector('#modelResult')
-    this.renderer.removeClass(resultModal, 'hideIt')
+    const resultModal = this.el.nativeElement.querySelector('#modelResult');
+    this.renderer.removeClass(resultModal, 'hideIt');
   }
   hideResultModal(): void {
-    const resultModal = this.el.nativeElement.querySelector('#modelResult')
-    this.renderer.addClass(resultModal, 'hideIt')
+    const resultModal = this.el.nativeElement.querySelector('#modelResult');
+    this.renderer.addClass(resultModal, 'hideIt');
   }
   showSpinner(): void {
-    const resultModal = this.el.nativeElement.querySelector('#spinner')
-    this.renderer.removeClass(resultModal, 'hideIt')
+    const resultModal = this.el.nativeElement.querySelector('#spinner');
+    this.renderer.removeClass(resultModal, 'hideIt');
   }
   hideSpinner(): void {
-    const resultModal = this.el.nativeElement.querySelector('#spinner')
-    this.renderer.addClass(resultModal, 'hideIt')
+    const resultModal = this.el.nativeElement.querySelector('#spinner');
+    this.renderer.addClass(resultModal, 'hideIt');
   }
   // for enable and disable inputs needed in actions form
   actionChose(): void {
     const action = (document.getElementById('action') as HTMLSelectElement)
-      .value
-    const object = document.getElementById('object') as HTMLInputElement
-    const input = document.getElementById('input') as HTMLInputElement
-    const target = document.getElementById('target') as HTMLInputElement
+      .value;
+    const object = document.getElementById('object') as HTMLInputElement;
+    const input = document.getElementById('input') as HTMLInputElement;
+    const target = document.getElementById('target') as HTMLInputElement;
 
-    object.disabled = true
-    input.disabled = true
-    target.disabled = true
+    object.disabled = true;
+    input.disabled = true;
+    target.disabled = true;
 
     if (action === '1' || action === '2' || action === '3') {
-      input.disabled = false
+      input.disabled = false;
     }
 
     if (action === '3' || action === '4') {
-      target.disabled = false
+      target.disabled = false;
     }
 
     if (
@@ -95,56 +95,60 @@ export class TestSeleniumComponent {
       action === '2' ||
       action === '3'
     ) {
-      object.disabled = false
+      object.disabled = false;
     }
   }
   //add new case
   submitCase() {
-    this.counterCase++
+    this.counterCase++;
     let caseName = (document.getElementById('caseName') as HTMLSelectElement)
-      .value
-    this.addCase({ case_id: this.counterCase, caseName: caseName, actions: [] })
-    ;(document.getElementById('caseName') as HTMLInputElement).value = ''
-    ;(document.getElementById('close2') as HTMLButtonElement).click()
-    this.counterAction = 1
+      .value;
+    this.addCase({
+      case_id: this.counterCase,
+      caseName: caseName,
+      actions: [],
+    });
+    (document.getElementById('caseName') as HTMLInputElement).value = '';
+    (document.getElementById('close2') as HTMLButtonElement).click();
+    this.counterAction = 1;
     const addActionButton = document.getElementById(
       'addActionButton',
-    ) as HTMLInputElement
-    addActionButton.disabled = false
+    ) as HTMLInputElement;
+    addActionButton.disabled = false;
   }
 
   public getCase(id: number) {
-    return this.cases.find((obj) => obj.case_id === id)
+    return this.cases.find((obj) => obj.case_id === id);
   }
   deleteCase(id: number) {
-    this.cases = this.cases.filter((item) => item.case_id !== id)
+    this.cases = this.cases.filter((item) => item.case_id !== id);
   }
 
   public addCase(obj: {
-    case_id: number
-    caseName: string
+    case_id: number;
+    caseName: string;
     actions: {
-      action_id: number
-      action_type_id: number
-      action_type_name: string
-      object: string
-      input: string
-      target: string
-    }[]
+      action_id: number;
+      action_type_id: number;
+      action_type_name: string;
+      object: string;
+      input: string;
+      target: string;
+    }[];
   }) {
-    this.cases.push(obj)
+    this.cases.push(obj);
   }
 
   // add new action
   submitAction() {
     let action_id = parseInt(
       (document.getElementById('action') as HTMLSelectElement).value,
-    )
-    let action2 = document.getElementById('action') as HTMLSelectElement
-    let action = action2.options[action2.selectedIndex].text
-    let object = (document.getElementById('object') as HTMLInputElement).value
-    let input = (document.getElementById('input') as HTMLInputElement).value
-    let target = (document.getElementById('target') as HTMLInputElement).value
+    );
+    let action2 = document.getElementById('action') as HTMLSelectElement;
+    let action = action2.options[action2.selectedIndex].text;
+    let object = (document.getElementById('object') as HTMLInputElement).value;
+    let input = (document.getElementById('input') as HTMLInputElement).value;
+    let target = (document.getElementById('target') as HTMLInputElement).value;
     this.addAction({
       action_id: this.counterAction,
       action_type_id: action_id,
@@ -152,39 +156,39 @@ export class TestSeleniumComponent {
       object: object,
       input: input,
       target: target,
-    })
-    console.log(this.getAction(this.counterAction))
-    this.counterAction++
+    });
+    console.log(this.getAction(this.counterAction));
+    this.counterAction++;
 
     // Clear the input fields
-    ;(document.getElementById('object') as HTMLInputElement).value = ''
-    ;(document.getElementById('input') as HTMLInputElement).value = ''
-    ;(document.getElementById('target') as HTMLInputElement).value = ''
-    ;(document.getElementById('close') as HTMLButtonElement).click()
+    (document.getElementById('object') as HTMLInputElement).value = '';
+    (document.getElementById('input') as HTMLInputElement).value = '';
+    (document.getElementById('target') as HTMLInputElement).value = '';
+    (document.getElementById('close') as HTMLButtonElement).click();
   }
   public addAction(obj: {
-    action_id: number
-    action_type_id: number
-    action_type_name: string
-    object: string
-    input: string
-    target: string
+    action_id: number;
+    action_type_id: number;
+    action_type_name: string;
+    object: string;
+    input: string;
+    target: string;
   }) {
-    this.getCase(this.counterCase)?.actions.push(obj)
+    this.getCase(this.counterCase)?.actions.push(obj);
   }
 
   public getAction(id: number) {
     return this.getCase(this.counterCase)?.actions.find(
       (obj) => obj.action_id === id,
-    )
+    );
   }
   deleteAction(caseId: number, actionId: number) {
-    const currentCase = this.getCase(caseId)
+    const currentCase = this.getCase(caseId);
 
     if (currentCase && currentCase.actions) {
       currentCase.actions = currentCase.actions.filter(
         (item) => item.action_id !== actionId,
-      )
+      );
     }
   }
 }

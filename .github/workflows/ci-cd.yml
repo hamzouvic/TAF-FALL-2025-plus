@@ -476,6 +476,12 @@ jobs:
 
           if [ -d artifacts/frontend-coverage ]; then
             cp -r artifacts/frontend-coverage/* frontend/coverage/ || true
+
+            # Normalize lcov path for Sonar (artifact may contain nested project folder)
+            LCOV_PATH=$(find frontend/coverage -name 'lcov.info' | head -1 || true)
+            if [ -n "$LCOV_PATH" ]; then
+              cp "$LCOV_PATH" frontend/coverage/lcov.info
+            fi
           fi
 
           if [ -f artifacts/test-generation-coverage-xml/coverage.xml ]; then

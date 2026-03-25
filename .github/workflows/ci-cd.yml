@@ -25,8 +25,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  MAVEN_OPTS: "-Xmx1024m"
-  NODE_OPTIONS: "--max-old-space-size=4096"
+  MAVEN_OPTS: '-Xmx1024m'
+  NODE_OPTIONS: '--max-old-space-size=4096'
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
@@ -40,7 +40,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
         with:
-          fetch-depth: 0  # Full history for SonarCloud analysis
+          fetch-depth: 0 # Full history for SonarCloud analysis
 
       - name: Set up JDK 17
         uses: actions/setup-java@v5
@@ -61,7 +61,7 @@ jobs:
 
       - name: Lint with Checkstyle
         working-directory: ./backend
-        run: mvn checkstyle:check -q || true  # Don't fail build on style issues for now
+        run: mvn checkstyle:check -q || true # Don't fail build on style issues for now
         continue-on-error: true
 
       - name: Run PMD Analysis
@@ -289,7 +289,7 @@ jobs:
   # Docker Images: Build (and optionally push to GHCR on main)
   # ============================================================================
   docker-images:
-    needs: [ backend, frontend, test-generation-service ]
+    needs: [backend, frontend, test-generation-service]
     runs-on: ubuntu-latest
     name: Docker Images (Build/Publish)
     if: always() && needs.backend.result == 'success' && needs.frontend.result == 'success' && needs.test-generation-service.result == 'success'
@@ -411,7 +411,7 @@ jobs:
   # Quality Gate: SonarCloud Analysis (runs after tests complete)
   # ============================================================================
   sonarcloud:
-    needs: [ backend, frontend, performance, test-generation-service ]
+    needs: [backend, frontend, performance, test-generation-service]
     runs-on: ubuntu-latest
     name: SonarCloud Quality Gate (main only)
     if: github.ref == 'refs/heads/main' && always()
@@ -419,7 +419,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
         with:
-          fetch-depth: 0  # Full history for SonarCloud analysis
+          fetch-depth: 0 # Full history for SonarCloud analysis
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -509,23 +509,13 @@ jobs:
       - name: Build Java bytecode for Sonar
         run: |
           mvn -N -f pom.docker.xml install -q
-          mvn -f performance/pom.xml clean install -DskipTests -q
-          mvn -f backend/pom.xml clean compile -DskipTests -q
+          mvn -f performance/pom.xml install -DskipTests -q
+          mvn -f backend/pom.xml compile -DskipTests -q
 
-      - name: Regenerate backend coverage for Sonar
-        working-directory: ./backend
-        env:
-          API_TEST_TOKEN: test-secret-for-ci-only
-          API_TEST_EXP_TIME: 3600000
-          API_TEST_URL: http://localhost
-          API_TEST_PORT: 8080
-          SELENIUM_URL: http://localhost
-          SELENIUM_PORT: 4444
-          EUREKA_CLIENT_ENABLED: false
+      - name: Restore coverage report
         run: |
-          mvn test jacoco:report -q
-          test -f target/site/jacoco/jacoco.xml
-          echo "JaCoCo report generated: $(wc -c < target/site/jacoco/jacoco.xml) bytes"
+          cp artifacts/backend-coverage/jacoco.xml \
+            backend/target/site/jacoco/jacoco.xml
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
@@ -589,7 +579,8 @@ jobs:
   # Reporting: Aggregate and summarize test results
   # ============================================================================
   reporting:
-    needs: [ backend, frontend, performance, test-generation-service, docker-images ]
+    needs:
+      [backend, frontend, performance, test-generation-service, docker-images]
     runs-on: ubuntu-latest
     name: Test Reports Aggregation
     if: always()
@@ -642,7 +633,7 @@ jobs:
           script: |
             const fs = require('fs');
             const comment = `## 📊 CI/CD Pipeline Results
-            
+
             | Component | Status |
             |-----------|--------|
             | Backend (Java/Maven) | ${{ needs.backend.result }} |
@@ -650,9 +641,9 @@ jobs:
             | Performance (Maven) | ${{ needs.performance.result }} |
             | Test Generation (Python) | ${{ needs.test-generation-service.result }} |
             | Docker Images | ${{ needs.docker-images.result }} |
-            
+
             [View detailed logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -715,7 +706,7 @@ jobs:
   # Documentation: Generate and publish docs to GitHub Pages (main/develop only)
   # ============================================================================
   documentation:
-    needs: [ backend, frontend, diagrams ]
+    needs: [backend, frontend, diagrams]
     runs-on: ubuntu-latest
     name: Generate & Publish Documentation
     if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && needs.backend.result == 'success' && needs.frontend.result == 'success'
@@ -768,10 +759,10 @@ jobs:
           # Build Maven classpath with all compile dependencies
           CLASSPATH=$(mvn dependency:build-classpath -Dmdep.outputFile=/dev/stdout -q 2>/dev/null)
           CLASSPATH="target/classes:${CLASSPATH}"
-          
+
           # Extract Java source files from packages
           SRC_FILES=$(find src/main/java -name '*.java' -type f)
-          
+
           if [ -n "$SRC_FILES" ]; then
             javadoc \
               -quiet \

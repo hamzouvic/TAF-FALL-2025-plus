@@ -1,7 +1,13 @@
-.showModelResult{
-    width: 100%; background-color: rgba(0, 0, 0, 0.4); height: 100vh;position: absolute;left: 0;top: 0; z-index: 9999;
+.showModelResult {
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  height: 100vh;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 9999;
 }
 
-.hideIt{
-    visibility: hidden;
+.hideIt {
+  visibility: hidden;
 }

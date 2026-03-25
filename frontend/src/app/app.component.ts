@@ -1,35 +1,34 @@
-import { Component, OnInit } from '@angular/core';
-import { TokenStorageService } from './_services/token-storage.service';
+import { Component, OnInit } from '@angular/core'
+import { TokenStorageService } from './_services/token-storage.service'
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
-  private roles: string[] = [];
-  isLoggedIn = false;
-  showAdminBoard = false;
-  fullName?: string;
+  private roles: string[] = []
+  isLoggedIn = false
+  showAdminBoard = false
+  fullName?: string
 
-  constructor(private tokenStorageService: TokenStorageService) {
-  }
+  constructor(private tokenStorageService: TokenStorageService) {}
 
   ngOnInit(): void {
-    this.isLoggedIn = !!this.tokenStorageService.getToken();
+    this.isLoggedIn = !!this.tokenStorageService.getToken()
 
     if (this.isLoggedIn) {
-      const user = this.tokenStorageService.getUser();
-      this.roles = user.roles;
+      const user = this.tokenStorageService.getUser()
+      this.roles = user.roles
 
-      this.showAdminBoard = this.roles.includes('ROLE_ADMIN');
+      this.showAdminBoard = this.roles.includes('ROLE_ADMIN')
 
-      this.fullName = user.fullName;
+      this.fullName = user.fullName
     }
   }
 
   logout(): void {
-    this.tokenStorageService.signOut();
-    window.location.reload();
+    this.tokenStorageService.signOut()
+    window.location.reload()
   }
 }

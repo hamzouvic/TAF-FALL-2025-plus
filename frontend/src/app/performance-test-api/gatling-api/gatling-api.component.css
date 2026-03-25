@@ -45,7 +45,7 @@
   color: #00d2ff;
   font-weight: 700;
   margin-bottom: 25px;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .form-group label strong {
@@ -87,7 +87,9 @@ select.form-control {
   border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.btn-next, .btn-launch, .btn-add-percentile {
+.btn-next,
+.btn-launch,
+.btn-add-percentile {
   background: #3a7bd5 !important;
   color: white !important;
   padding: 10px 30px !important;
@@ -98,7 +100,9 @@ select.form-control {
   box-shadow: 0 5px 15px rgba(58, 123, 213, 0.3) !important;
 }
 
-.btn-next:hover, .btn-launch:hover, .btn-add-percentile:hover {
+.btn-next:hover,
+.btn-launch:hover,
+.btn-add-percentile:hover {
   background: #00d2ff !important;
   transform: translateY(-2px) !important;
   box-shadow: 0 8px 20px rgba(0, 210, 255, 0.4) !important;
@@ -148,7 +152,7 @@ select.form-control {
 .gatling-logo {
   max-width: 200px;
   margin-bottom: 30px;
-  filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1));
+  filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.1));
 }
 
 .required-star {
@@ -161,15 +165,21 @@ select.form-control {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .table-custom {
   background: white;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 .table-custom th {
@@ -279,7 +289,7 @@ select.form-control {
   margin: 10% auto;
   border-radius: 15px;
   width: 60%;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   overflow: hidden;
 }
 
@@ -373,7 +383,8 @@ select.form-control {
   border-collapse: collapse;
 }
 
-.assertions-table th, .assertions-table td {
+.assertions-table th,
+.assertions-table td {
   padding: 12px;
   text-align: left;
   border-bottom: 1px solid #eee;

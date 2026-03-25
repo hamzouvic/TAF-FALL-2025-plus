@@ -9,4 +9,4 @@ module.exports = {
     '@app/(.*)': '<rootDir>/src/app/$1',
     '@environments/(.*)': '<rootDir>/src/environments/$1',
   },
-};
+}

@@ -10,6 +10,6 @@ export class JMeterFTPRequest {
     public localfile: string = '',
     public username: string = '',
     public password: string = '',
-    public loop: string = ''
+    public loop: string = '',
   ) {}
 }

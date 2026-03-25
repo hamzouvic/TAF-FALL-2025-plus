@@ -36,16 +36,17 @@ class LLMGenerateResponse(BaseModel):
 
 app = FastAPI(title="Test Generation Service", version="0.1.0")
 # TODO: Restrict access to only the frontend app's domain in production
-origins = ['*']
+origins = ["*"]
 
 # 2. Add the middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],    # This allows POST, OPTIONS, etc.
-    allow_headers=["*"],    # This allows Content-Type
+    allow_methods=["*"],  # This allows POST, OPTIONS, etc.
+    allow_headers=["*"],  # This allows Content-Type
 )
+
 
 def _baml_generate(prompt: str) -> Optional[JMeterHttpPlan]:
     """
@@ -98,7 +99,11 @@ def _fallback_generate(prompt: str) -> JMeterHttpPlan:
         if domain_match:
             domain = domain_match.group(1)
 
-        path_match = re.search(r"\bpath\s*[:=]?\s*(/[-a-zA-Z0-9_./{}]*)", prompt, flags=re.IGNORECASE)
+        path_match = re.search(
+            r"\bpath\s*[:=]?\s*(/[-a-zA-Z0-9_./{}]*)",
+            prompt,
+            flags=re.IGNORECASE,
+        )
         if path_match:
             path = path_match.group(1)
 
@@ -107,8 +112,16 @@ def _fallback_generate(prompt: str) -> JMeterHttpPlan:
         method=method,
         domain=domain,
         path=path,
-        nbThreads=_extract_number(prompt, [r"(\d+)\s*(users|utilisateurs|threads?)"], "10"),
-        rampTime=_extract_number(prompt, [r"ramp(?:-|\s)?up\s*(\d+)", r"mont[ée]e\s*(\d+)"], "5"),
+        nbThreads=_extract_number(
+            prompt,
+            [r"(\d+)\s*(users|utilisateurs|threads?)"],
+            "10",
+        ),
+        rampTime=_extract_number(
+            prompt,
+            [r"ramp(?:-|\s)?up\s*(\d+)", r"mont[ée]e\s*(\d+)"],
+            "5",
+        ),
         duration=_extract_number(prompt, [r"(\d+)\s*(seconds|secondes|sec|s)"], "60"),
         loop=_extract_number(prompt, [r"(\d+)\s*(loops|boucles?)"], "1"),
     )

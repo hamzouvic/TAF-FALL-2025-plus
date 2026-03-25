@@ -9,6 +9,6 @@ export class JMeterHttpRequest {
     public path: string = '',
     public method: string = '',
     public loop: string = '',
-    public data: string = ''
+    public data: string = '',
   ) {}
 }

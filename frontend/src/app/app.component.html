@@ -9,22 +9,34 @@
         <a href="/test-api" class="nav-link" routerLink="test-api">Test API </a>
       </li>
       <li class="nav-item">
-        <a href="/test-selenium" class="nav-link" routerLink="test-selenium">Test Selenium </a>
+        <a href="/test-selenium" class="nav-link" routerLink="test-selenium"
+          >Test Selenium
+        </a>
       </li>
       <li class="nav-item">
-        <a href="/test-api" class="nav-link" routerLink="performance-test-api">Test de performance </a>
+        <a href="/test-api" class="nav-link" routerLink="performance-test-api"
+          >Test de performance
+        </a>
       </li>
       <li class="nav-item" *ngIf="showAdminBoard">
         <a href="/admin" class="nav-link" routerLink="admin">Admin Board</a>
       </li>
       <li class="nav-item">
-        <a href="/project" class="nav-link" *ngIf="isLoggedIn" routerLink="project">Nouveau Projet</a>
+        <a
+          href="/project"
+          class="nav-link"
+          *ngIf="isLoggedIn"
+          routerLink="project"
+          >Nouveau Projet</a
+        >
       </li>
     </ul>
 
     <ul class="navbar-nav ml-auto" *ngIf="!isLoggedIn">
       <li class="nav-item">
-        <a href="/register" class="nav-link" routerLink="register">Inscription</a>
+        <a href="/register" class="nav-link" routerLink="register"
+          >Inscription</a
+        >
       </li>
       <li class="nav-item">
         <a href="/login" class="nav-link" routerLink="login">Connexion</a>
@@ -33,7 +45,9 @@
 
     <ul class="navbar-nav ml-auto" *ngIf="isLoggedIn">
       <li class="nav-item">
-        <a href="/profile" class="nav-link" routerLink="profile">{{ fullName }}</a>
+        <a href="/profile" class="nav-link" routerLink="profile">{{
+          fullName
+        }}</a>
       </li>
       <li class="nav-item">
         <a href class="nav-link" (click)="logout()">Déconnexion</a>

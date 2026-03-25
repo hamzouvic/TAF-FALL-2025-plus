@@ -34,7 +34,9 @@
           #username="ngModel"
         />
         <div class="alert-danger" *ngIf="username.errors && f.submitted">
-          <div *ngIf="username.errors['required']">Nom d'utilisateur requis</div>
+          <div *ngIf="username.errors['required']">
+            Nom d'utilisateur requis
+          </div>
           <div *ngIf="username.errors['minlength']">
             Le nom d'utilisateur doit contenir au moins 3 cractères
           </div>
@@ -56,9 +58,7 @@
         />
         <div class="alert-danger" *ngIf="email.errors && f.submitted">
           <div *ngIf="email.errors['required']">Courriel Requis</div>
-          <div *ngIf="email.errors['email']">
-            Le courriel doit être valide
-          </div>
+          <div *ngIf="email.errors['email']">Le courriel doit être valide</div>
         </div>
       </div>
       <div class="form-group">

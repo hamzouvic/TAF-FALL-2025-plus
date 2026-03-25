@@ -141,7 +141,7 @@ jobs:
 
       - name: Lint with ESLint
         working-directory: ./frontend
-        run: npm run lint -- --format json > eslint-report.json 2>&1
+        run: npm run lint
 
       - name: Format Check with Prettier
         working-directory: ./frontend

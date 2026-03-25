@@ -2,21 +2,18 @@ mat-card {
   max-width: 600px;
   margin: 2em auto;
   text-align: center;
- max-height: 90vh;
+  max-height: 90vh;
 }
 mat-card-content.scrollable-content {
   max-height: 80vh;
   overflow-y: auto;
-
 }
-.example-min-width{
+.example-min-width {
   padding: 10px;
 }
 
-
-.header{
+.header {
   text-align: center;
-
 }
 .full-width {
   width: 80%;
@@ -31,19 +28,17 @@ mat-card-content.scrollable-content {
   text-align: center;
 }
 
-.forget-password{
+.forget-password {
   padding-left: 0px;
 }
 
-
-
 .contentBody {
   padding: 60px 1rem;
-  background :#1b6ca8;
+  background: #1b6ca8;
   display: block;
 }
 
-.aLink{
+.aLink {
   float: right;
   padding-right: 60px;
   text-decoration: none;

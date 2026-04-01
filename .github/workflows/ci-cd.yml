@@ -486,10 +486,10 @@ jobs:
 
           if [ -n "$COND_ID" ]; then
             HTTP_CODE=$(curl -sS -o /tmp/sonar_gate_update.json -w "%{http_code}" -u "${SONAR_TOKEN}:" -X POST \
-              "https://sonarcloud.io/api/qualitygates/update_condition?id=${COND_ID}&metric=new_coverage&op=LT&error=60")
+              "https://sonarcloud.io/api/qualitygates/update_condition?organization=${ORG_KEY}&id=${COND_ID}&metric=new_coverage&op=LT&error=60")
           else
             HTTP_CODE=$(curl -sS -o /tmp/sonar_gate_update.json -w "%{http_code}" -u "${SONAR_TOKEN}:" -X POST \
-              "https://sonarcloud.io/api/qualitygates/create_condition?gateId=${GATE_ID}&metric=new_coverage&op=LT&error=60")
+              "https://sonarcloud.io/api/qualitygates/create_condition?organization=${ORG_KEY}&gateId=${GATE_ID}&metric=new_coverage&op=LT&error=60")
           fi
 
           if [ "$HTTP_CODE" != "200" ] && [ "$HTTP_CODE" != "204" ]; then

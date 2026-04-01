@@ -459,6 +459,60 @@ jobs:
             cat /tmp/sonar_new_code.json || true
           fi
 
+      - name: Ensure Sonar quality gate new coverage is 60%
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          PROJECT_KEY=$(grep '^sonar.projectKey=' sonar-project.properties | cut -d'=' -f2)
+          ORG_KEY=$(grep '^sonar.organization=' sonar-project.properties | cut -d'=' -f2)
+          GATE_NAME="TAF New Code Coverage 60"
+
+          search_gate() {
+            curl -sS -u "${SONAR_TOKEN}:" \
+              "https://sonarcloud.io/api/qualitygates/search?organization=${ORG_KEY}"
+          }
+
+          extract_gate_id() {
+            python3 -c 'import json,sys; target=sys.argv[1]; data=json.load(sys.stdin); print(next((str(g.get("id", "")) for g in data.get("qualitygates", []) if g.get("name") == target), ""))' "$GATE_NAME"
+          }
+
+          GATE_ID=$(search_gate | extract_gate_id)
+
+          if [ -z "$GATE_ID" ]; then
+            echo "Creating quality gate: ${GATE_NAME}"
+            CREATE_RESP=$(curl -sS -u "${SONAR_TOKEN}:" -X POST \
+              "https://sonarcloud.io/api/qualitygates/create?organization=${ORG_KEY}&name=$(printf '%s' "$GATE_NAME" | sed 's/ /%20/g')")
+            GATE_ID=$(printf '%s' "$CREATE_RESP" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("id",""))')
+          fi
+
+          if [ -z "$GATE_ID" ]; then
+            echo "Unable to resolve quality gate id; keeping existing Sonar settings."
+            exit 0
+          fi
+
+          SHOW_RESP=$(curl -sS -u "${SONAR_TOKEN}:" \
+            "https://sonarcloud.io/api/qualitygates/show?organization=${ORG_KEY}&id=${GATE_ID}")
+
+          COND_ID=$(printf '%s' "$SHOW_RESP" | python3 -c 'import json,sys; d=json.load(sys.stdin); c=d.get("conditions",[]); m=[x for x in c if x.get("metric")=="new_coverage"]; print(m[0].get("id","") if m else "")')
+
+          if [ -n "$COND_ID" ]; then
+            curl -sS -u "${SONAR_TOKEN}:" -X POST \
+              "https://sonarcloud.io/api/qualitygates/update_condition?id=${COND_ID}&metric=new_coverage&op=LT&error=60" >/tmp/sonar_gate_update.json || true
+          else
+            curl -sS -u "${SONAR_TOKEN}:" -X POST \
+              "https://sonarcloud.io/api/qualitygates/create_condition?gateId=${GATE_ID}&metric=new_coverage&op=LT&error=60" >/tmp/sonar_gate_create_condition.json || true
+          fi
+
+          SELECT_CODE=$(curl -sS -o /tmp/sonar_gate_select.json -w "%{http_code}" -u "${SONAR_TOKEN}:" -X POST \
+            "https://sonarcloud.io/api/qualitygates/select?projectKey=${PROJECT_KEY}&gateId=${GATE_ID}")
+
+          if [ "$SELECT_CODE" = "200" ] || [ "$SELECT_CODE" = "204" ]; then
+            echo "Quality gate '${GATE_NAME}' selected for ${PROJECT_KEY} with new_coverage threshold at 60%."
+          else
+            echo "Could not select quality gate (HTTP ${SELECT_CODE}); keeping existing gate."
+            cat /tmp/sonar_gate_select.json || true
+          fi
+
       - name: Prepare coverage reports for SonarScanner
         run: |
           mkdir -p backend/target/site/jacoco

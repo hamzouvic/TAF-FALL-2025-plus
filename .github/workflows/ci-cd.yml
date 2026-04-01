@@ -31,11 +31,11 @@ env:
 
 jobs:
   # ============================================================================
-  # Backend: Build, Lint, Test, Coverage
+  # Backend: Staged pipeline for clear Actions graph
   # ============================================================================
-  backend:
+  backend_build:
     runs-on: ubuntu-latest
-    name: Backend (Java/Maven)
+    name: Backend - Build
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -59,6 +59,27 @@ jobs:
         working-directory: ./backend
         run: mvn clean compile -DskipTests -q
 
+  backend_lint:
+    needs: [backend_build]
+    runs-on: ubuntu-latest
+    name: Backend - Lint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'sapmachine'
+          cache: maven
+
+      - name: Install Parent POM
+        run: mvn -N -f pom.docker.xml install -q
+
+      - name: Build Performance Artifacts Required by Backend
+        run: mvn -f performance/pom.xml clean install -DskipTests -q
+
       - name: Lint with Checkstyle
         working-directory: ./backend
         run: mvn checkstyle:check -q
@@ -66,6 +87,27 @@ jobs:
       - name: Run PMD Analysis
         working-directory: ./backend
         run: mvn pmd:check -q
+
+  backend_unit_test:
+    needs: [backend_lint]
+    runs-on: ubuntu-latest
+    name: Backend - Unit Test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'sapmachine'
+          cache: maven
+
+      - name: Install Parent POM
+        run: mvn -N -f pom.docker.xml install -q
+
+      - name: Build Performance Artifacts Required by Backend
+        run: mvn -f performance/pom.xml clean install -DskipTests -q
 
       - name: Unit Tests
         working-directory: ./backend
@@ -79,6 +121,27 @@ jobs:
           SELENIUM_PORT: 4444
           EUREKA_CLIENT_ENABLED: false
 
+  backend_integration_test:
+    needs: [backend_unit_test]
+    runs-on: ubuntu-latest
+    name: Backend - Integration Test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'sapmachine'
+          cache: maven
+
+      - name: Install Parent POM
+        run: mvn -N -f pom.docker.xml install -q
+
+      - name: Build Performance Artifacts Required by Backend
+        run: mvn -f performance/pom.xml clean install -DskipTests -q
+
       - name: Integration Tests
         working-directory: ./backend
         run: mvn failsafe:integration-test -q
@@ -91,17 +154,30 @@ jobs:
           SELENIUM_PORT: 4444
           EUREKA_CLIENT_ENABLED: false
 
+  backend_coverage:
+    needs: [backend_integration_test]
+    runs-on: ubuntu-latest
+    name: Backend - Coverage
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'sapmachine'
+          cache: maven
+
+      - name: Install Parent POM
+        run: mvn -N -f pom.docker.xml install -q
+
+      - name: Build Performance Artifacts Required by Backend
+        run: mvn -f performance/pom.xml clean install -DskipTests -q
+
       - name: Generate JaCoCo Coverage Report
         working-directory: ./backend
         run: mvn jacoco:report -q
-
-      - name: Archive Backend Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-jar
-          path: backend/target/*.jar
-          retention-days: 5
-          if-no-files-found: ignore
 
       - name: Archive Coverage Report
         uses: actions/upload-artifact@v4
@@ -111,12 +187,95 @@ jobs:
           retention-days: 30
           if-no-files-found: ignore
 
-  # ============================================================================
-  # Frontend: Build, Lint, Test, Coverage
-  # ============================================================================
-  frontend:
+  backend_package:
+    needs: [backend_coverage]
     runs-on: ubuntu-latest
-    name: Frontend (Angular)
+    name: Backend - Package
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'sapmachine'
+          cache: maven
+
+      - name: Install Parent POM
+        run: mvn -N -f pom.docker.xml install -q
+
+      - name: Build Performance Artifacts Required by Backend
+        run: mvn -f performance/pom.xml clean install -DskipTests -q
+
+      - name: Package Backend (without tests)
+        working-directory: ./backend
+        run: mvn clean package -DskipTests -q
+
+      - name: Archive Backend Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/target/*.jar
+          retention-days: 5
+          if-no-files-found: ignore
+
+  # ============================================================================
+  # Frontend: Staged pipeline for clear Actions graph
+  # ============================================================================
+  frontend_build:
+    runs-on: ubuntu-latest
+    name: Frontend - Build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm install --legacy-peer-deps
+
+      - name: Build Angular Project
+        working-directory: ./frontend
+        run: npm run build
+
+  frontend_lint:
+    needs: [frontend_build]
+    runs-on: ubuntu-latest
+    name: Frontend - Lint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm install --legacy-peer-deps
+
+      - name: Lint with ESLint
+        working-directory: ./frontend
+        run: npm run lint
+
+      - name: Format Check with Prettier
+        working-directory: ./frontend
+        run: npm run format:check
+
+  frontend_unit_test:
+    needs: [frontend_lint]
+    runs-on: ubuntu-latest
+    name: Frontend - Unit Test
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -139,31 +298,43 @@ jobs:
         working-directory: ./frontend
         run: npm install --legacy-peer-deps
 
-      - name: Lint with ESLint
+      - name: Run Unit Tests
         working-directory: ./frontend
-        run: npm run lint
+        run: npm run test -- --watch=false
+        env:
+          CI: 'true'
 
-      - name: Format Check with Prettier
-        working-directory: ./frontend
-        run: npm run format:check
+  frontend_coverage:
+    needs: [frontend_unit_test]
+    runs-on: ubuntu-latest
+    name: Frontend - Coverage
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
 
-      - name: Build Angular Project
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install Chrome Headless
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+        env:
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
+
+      - name: Install dependencies
         working-directory: ./frontend
-        run: npm run build
+        run: npm install --legacy-peer-deps
 
       - name: Run Unit Tests with Coverage
         working-directory: ./frontend
         run: npm run test -- --watch=false --code-coverage
         env:
           CI: 'true'
-
-      - name: Archive Frontend Build
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-build
-          path: frontend/dist/
-          retention-days: 5
-          if-no-files-found: ignore
 
       - name: Archive Coverage Report
         uses: actions/upload-artifact@v4
@@ -173,12 +344,43 @@ jobs:
           retention-days: 30
           if-no-files-found: ignore
 
-  # ============================================================================
-  # Performance Tests: Build, Lint, Test
-  # ============================================================================
-  performance:
+  frontend_package:
+    needs: [frontend_coverage]
     runs-on: ubuntu-latest
-    name: Performance Tests (Maven)
+    name: Frontend - Package
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm install --legacy-peer-deps
+
+      - name: Build Angular Project
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: Archive Frontend Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/dist/
+          retention-days: 5
+          if-no-files-found: ignore
+
+  # ============================================================================
+  # Performance: Staged pipeline for clear Actions graph
+  # ============================================================================
+  performance_build:
+    runs-on: ubuntu-latest
+    name: Performance - Build
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -197,6 +399,24 @@ jobs:
         working-directory: ./performance
         run: mvn clean compile -DskipTests -q
 
+  performance_lint:
+    needs: [performance_build]
+    runs-on: ubuntu-latest
+    name: Performance - Lint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'sapmachine'
+          cache: maven
+
+      - name: Install Parent POM
+        run: mvn -N -f pom.docker.xml install -q
+
       - name: Lint with Checkstyle
         working-directory: ./performance
         run: mvn checkstyle:check -q
@@ -205,9 +425,45 @@ jobs:
         working-directory: ./performance
         run: mvn pmd:check -q
 
+  performance_unit_test:
+    needs: [performance_lint]
+    runs-on: ubuntu-latest
+    name: Performance - Unit Test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'sapmachine'
+          cache: maven
+
+      - name: Install Parent POM
+        run: mvn -N -f pom.docker.xml install -q
+
       - name: Run Performance Tests
         working-directory: ./performance
         run: mvn test -q
+
+  performance_coverage:
+    needs: [performance_unit_test]
+    runs-on: ubuntu-latest
+    name: Performance - Coverage
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'sapmachine'
+          cache: maven
+
+      - name: Install Parent POM
+        run: mvn -N -f pom.docker.xml install -q
 
       - name: Generate Coverage Report
         working-directory: ./performance
@@ -221,12 +477,54 @@ jobs:
           retention-days: 30
           if-no-files-found: ignore
 
-  # ============================================================================
-  # Python Test Generation Service: Build, Lint, Test
-  # ============================================================================
-  test-generation-service:
+  performance_package:
+    needs: [performance_coverage]
     runs-on: ubuntu-latest
-    name: Test Generation Service (Python)
+    name: Performance - Package
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'sapmachine'
+          cache: maven
+
+      - name: Install Parent POM
+        run: mvn -N -f pom.docker.xml install -q
+
+      - name: Package Performance Modules (without tests)
+        working-directory: ./performance
+        run: mvn clean package -DskipTests -q
+
+  # ============================================================================
+  # Test Generation Service: Staged pipeline for clear Actions graph
+  # ============================================================================
+  test_generation_build:
+    runs-on: ubuntu-latest
+    name: Test Generation - Build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: ./test-generation-service
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+  test_generation_lint:
+    needs: [test_generation_build]
+    runs-on: ubuntu-latest
+    name: Test Generation - Lint
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -246,6 +544,50 @@ jobs:
       - name: Format Check with black
         working-directory: ./test-generation-service
         run: black --check app
+
+  test_generation_unit_test:
+    needs: [test_generation_lint]
+    runs-on: ubuntu-latest
+    name: Test Generation - Unit Test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: ./test-generation-service
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Run pytest
+        working-directory: ./test-generation-service
+        run: pytest -q
+
+  test_generation_coverage:
+    needs: [test_generation_unit_test]
+    runs-on: ubuntu-latest
+    name: Test Generation - Coverage
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: ./test-generation-service
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
 
       - name: Run pytest with Coverage
         working-directory: ./test-generation-service
@@ -267,14 +609,49 @@ jobs:
           retention-days: 30
           if-no-files-found: ignore
 
+  test_generation_package:
+    needs: [test_generation_coverage]
+    runs-on: ubuntu-latest
+    name: Test Generation - Package
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: ./test-generation-service
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Build source package artifact
+        working-directory: ./test-generation-service
+        run: |
+          mkdir -p dist
+          tar -czf dist/test-generation-service-source.tar.gz \
+            app baml_src requirements.txt requirements-dev.txt pytest.ini
+
+      - name: Archive Python Package Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-generation-package
+          path: test-generation-service/dist/
+          retention-days: 5
+          if-no-files-found: ignore
+
   # ============================================================================
   # Docker Images: Build (and optionally push to GHCR on main)
   # ============================================================================
   docker-images:
-    needs: [backend, frontend, test-generation-service]
+    needs: [backend_package, frontend_package, test_generation_package]
     runs-on: ubuntu-latest
     name: Docker Images (Build/Publish)
-    if: always() && needs.backend.result == 'success' && needs.frontend.result == 'success' && needs.test-generation-service.result == 'success'
+    if: always() && needs.backend_package.result == 'success' && needs.frontend_package.result == 'success' && needs.test_generation_package.result == 'success'
     env:
       DOCKER_PUSH: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
       DOCKER_BUILD_SUMMARY: 'false'
@@ -393,7 +770,7 @@ jobs:
   # Quality Gate: SonarCloud Analysis (runs after tests complete)
   # ============================================================================
   sonarcloud:
-    needs: [backend, frontend, performance, test-generation-service]
+    needs: [backend_package, frontend_package, performance_package, test_generation_package]
     runs-on: ubuntu-latest
     name: SonarCloud Quality Gate (main only)
     if: github.ref == 'refs/heads/main' && always()
@@ -592,7 +969,7 @@ jobs:
   # ============================================================================
   reporting:
     needs:
-      [backend, frontend, performance, test-generation-service, docker-images]
+      [backend_package, frontend_package, performance_package, test_generation_package, docker-images]
     runs-on: ubuntu-latest
     name: Test Reports Aggregation
     if: always()
@@ -625,10 +1002,10 @@ jobs:
           echo "# CI/CD Test Results Summary" > $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Pipeline Status" >> $GITHUB_STEP_SUMMARY
-          echo "- **Backend**: ${{ needs.backend.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Frontend**: ${{ needs.frontend.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Performance**: ${{ needs.performance.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Test Generation Service**: ${{ needs.test-generation-service.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Backend**: ${{ needs.backend_package.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend**: ${{ needs.frontend_package.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Performance**: ${{ needs.performance_package.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Test Generation Service**: ${{ needs.test_generation_package.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Docker Images**: ${{ needs.docker-images.result }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Artifacts Available" >> $GITHUB_STEP_SUMMARY
@@ -648,10 +1025,10 @@ jobs:
 
             | Component | Status |
             |-----------|--------|
-            | Backend (Java/Maven) | ${{ needs.backend.result }} |
-            | Frontend (Angular) | ${{ needs.frontend.result }} |
-            | Performance (Maven) | ${{ needs.performance.result }} |
-            | Test Generation (Python) | ${{ needs.test-generation-service.result }} |
+            | Backend (Java/Maven) | ${{ needs.backend_package.result }} |
+            | Frontend (Angular) | ${{ needs.frontend_package.result }} |
+            | Performance (Maven) | ${{ needs.performance_package.result }} |
+            | Test Generation (Python) | ${{ needs.test_generation_package.result }} |
             | Docker Images | ${{ needs.docker-images.result }} |
 
             [View detailed logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
@@ -718,10 +1095,10 @@ jobs:
   # Documentation: Generate and publish docs to GitHub Pages (main/develop only)
   # ============================================================================
   documentation:
-    needs: [backend, frontend, diagrams]
+    needs: [backend_package, frontend_package, diagrams]
     runs-on: ubuntu-latest
     name: Generate & Publish Documentation
-    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && needs.backend.result == 'success' && needs.frontend.result == 'success'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && needs.backend_package.result == 'success' && needs.frontend_package.result == 'success'
     permissions:
       contents: write
     steps:

@@ -229,7 +229,7 @@ Le script `prepare` installe automatiquement les hooks.
 
 Checks executes au commit:
 
-- Frontend: `npm run lint` + `npm run format:check` (et lint-staged sur fichiers `frontend/src`)
+- Frontend: `npm run lint` + checks `lint-staged` (Prettier/ESLint) sur fichiers stages dans `frontend/src`
 - Backend: `mvn -f backend/pom.xml -q checkstyle:check pmd:check test`
 - Python: `python -m black --check app` + `python -m pytest -q` dans `test-generation-service`
 

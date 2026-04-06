@@ -11,6 +11,7 @@ Ce depot contient une version refactoree du TAF (Test Automation Framework) real
 Le projet TAF original provient d'un projet etudiant de l'ETS. Cette version refactoree vise a le rendre plus simple a manipuler, plus stable a executer et plus facile a faire evoluer.
 
 L'objectif est de maintenir une base de code plus stable, testable et observable, avec:
+
 - un backend Spring Boot
 - un frontend Angular
 - des modules de performance (Gatling/JMeter)
@@ -20,6 +21,7 @@ L'objectif est de maintenir une base de code plus stable, testable et observable
 ## Contexte TP2 (MGL7760 - UQAM)
 
 Cette version "TAF-Refactored" formalise le travail de refactorisation demande dans le TP2, a partir de la base etudiante issue de l'ETS:
+
 - reduction de la dette technique
 - stabilisation des tests et du pipeline
 - standardisation des processus d'integration continue
@@ -98,6 +100,7 @@ mvn test jacoco:report -q
 Le workflow principal est: `.github/workflows/ci-cd.yml`.
 
 Le pipeline execute notamment:
+
 - build + tests backend
 - build + tests frontend
 - verifications performance
@@ -107,6 +110,7 @@ Le pipeline execute notamment:
 - build des images Docker (backend, frontend, service Python)
 
 Points importants du pipeline actuel:
+
 - SonarCloud reste visible meme en cas de quality gate rouge (`sonar.qualitygate.wait=false`)
 - la couverture backend est regeneree dans le job Sonar pour eviter les faux `0%`
 - la documentation backend/frontend est publiee avec fallback pour garantir des URLs valides
@@ -117,11 +121,13 @@ Points importants du pipeline actuel:
 Les images sont publiees automatiquement par le pipeline sur la branche `main`.
 
 Depot Docker Hub:
+
 - `docker.io/hamzaafif/taf-backend`
 - `docker.io/hamzaafif/taf-frontend`
 - `docker.io/hamzaafif/taf-test-generation`
 
 Tags publies:
+
 - `main`
 - `sha-<commit>`
 
@@ -166,6 +172,7 @@ Les diagrammes sont générés automatiquement dans le pipeline et intégrés da
 ## SonarCloud
 
 Projet SonarCloud:
+
 - Dashboard: <https://sonarcloud.io/project/overview?id=HamzaAfif_TAF-FALL-2025>
 - Branche principale: <https://sonarcloud.io/dashboard?id=HamzaAfif_TAF-FALL-2025&branch=main>
 
@@ -183,6 +190,7 @@ mvn test jacoco:report -q
 ```
 
 Puis ouvrir le rapport de couverture:
+
 - `backend/target/site/jacoco/index.html`
 
 ## Processus de correction CI/CD (historique + runbook)
@@ -192,6 +200,7 @@ Pour tout le detail des correctifs appliques, des incidents rencontres et de la 
 - [CI_CD_FIX_GUIDE.md](./CI_CD_FIX_GUIDE.md)
 
 Ce document couvre:
+
 - les correctifs frontend/backend/python
 - les ajustements SonarCloud et couverture
 - les correctifs JavaDoc
@@ -200,6 +209,7 @@ Ce document couvre:
 ## Contribution
 
 Pour une contribution propre:
+
 1. creer une branche de travail
 2. ajouter des tests avec votre changement
 3. verifier localement (`mvn test`, `npm test`)
@@ -218,6 +228,7 @@ npm install --legacy-peer-deps
 Le script `prepare` installe automatiquement les hooks.
 
 Checks executes au commit:
+
 - Frontend: `npm run lint` + `npm run format:check` (et lint-staged sur fichiers `frontend/src`)
 - Backend: `mvn -f backend/pom.xml -q checkstyle:check pmd:check test`
 - Python: `python -m black --check app` + `python -m pytest -q` dans `test-generation-service`

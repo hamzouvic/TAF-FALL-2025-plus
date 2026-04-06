@@ -4,8 +4,25 @@
     "@eslint/js": "^9.13.0",
     "eslint": "^9.13.0",
     "globals": "^15.11.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
     "prettier": "^3.3.3",
     "typescript-eslint": "^8.12.2"
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+  "scripts": {
+    "prepare": "husky",
+    "precommit": "npm run precommit:frontend && npm run precommit:backend && npm run precommit:python",
+    "precommit:frontend": "npm --prefix frontend run lint && npm --prefix frontend run format:check",
+    "precommit:backend": "mvn -f backend/pom.xml -q checkstyle:check pmd:check test",
+    "precommit:python": "cd test-generation-service && python -m black --check app && python -m pytest -q"
+  },
+  "lint-staged": {
+    "frontend/src/**/*.{ts,html,less,css,json}": [
+      "npm --prefix frontend exec -- prettier --check"
+    ],
+    "frontend/src/**/*.{ts,html}": [
+      "npm --prefix frontend exec -- eslint --max-warnings=0"
+    ]
+  }
 }

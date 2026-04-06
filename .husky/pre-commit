@@ -1,0 +1,37 @@
+#!/usr/bin/env sh
+set -e
+
+staged_files="$(git diff --cached --name-only --diff-filter=ACMR)"
+
+if [ -z "$staged_files" ]; then
+	echo "No staged files to validate."
+	exit 0
+fi
+
+run_frontend=false
+run_backend=false
+run_python=false
+
+echo "$staged_files" | grep -Eq '^frontend/' && run_frontend=true || true
+echo "$staged_files" | grep -Eq '^backend/|^pom\.docker\.xml$|^performance/' && run_backend=true || true
+echo "$staged_files" | grep -Eq '^test-generation-service/' && run_python=true || true
+
+echo "Running pre-commit validations..."
+
+if [ "$run_frontend" = true ]; then
+	echo "- Frontend checks"
+	npx lint-staged
+	npm run precommit:frontend
+fi
+
+if [ "$run_backend" = true ]; then
+	echo "- Backend checks"
+	npm run precommit:backend
+fi
+
+if [ "$run_python" = true ]; then
+	echo "- Python checks"
+	npm run precommit:python
+fi
+
+echo "Pre-commit checks completed."

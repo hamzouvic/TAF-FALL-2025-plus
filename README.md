@@ -205,6 +205,29 @@ Pour une contribution propre:
 3. verifier localement (`mvn test`, `npm test`)
 4. ouvrir une pull request avec description claire
 
+### Hooks pre-commit (Husky)
+
+Le depot inclut un hook Git pre-commit versionne via Husky.
+
+Installation locale (depuis la racine):
+
+```bash
+npm install --legacy-peer-deps
+```
+
+Le script `prepare` installe automatiquement les hooks.
+
+Checks executes au commit:
+- Frontend: `npm run lint` + `npm run format:check` (et lint-staged sur fichiers `frontend/src`)
+- Backend: `mvn -f backend/pom.xml -q checkstyle:check pmd:check test`
+- Python: `python -m black --check app` + `python -m pytest -q` dans `test-generation-service`
+
+Execution manuelle de tous les checks pre-commit:
+
+```bash
+npm run precommit
+```
+
 ## Statut
 
 Projet actif dans le cadre du TP2 MGL7760.
